@@ -141,6 +141,8 @@ class BasRvg1Source(DatasetSource):
                     logger.warning(f"Could not read duration for {audio_path}: {e}")
                     duration = 0.0
 
+                logger.info(f"Found sample: {audio_path.name} (duration={duration:.2f}s)")
+
                 speaker_meta = metadata_map.get(speaker_id, {})
 
                 sample_metadata = {
