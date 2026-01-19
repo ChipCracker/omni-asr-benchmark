@@ -68,7 +68,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-duration",
         type=float,
-        default=40.0,
+        default=120.0,
         help="Maximum audio duration in seconds (skip longer files)",
     )
     parser.add_argument(
