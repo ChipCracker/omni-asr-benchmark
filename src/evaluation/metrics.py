@@ -1,8 +1,26 @@
 """ASR evaluation metrics using jiwer."""
 
+import re
+import string
 from typing import Dict, List, Any
 
 from jiwer import wer, cer, process_words
+
+
+def normalize_text(text: str) -> str:
+    """Normalize text for ASR evaluation.
+
+    - Lowercase
+    - Remove punctuation
+    - Normalize whitespace
+    """
+    if not text:
+        return ""
+
+    text = text.lower()
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
 def compute_asr_metrics(
@@ -34,6 +52,10 @@ def compute_asr_metrics(
             "num_samples": 0,
         }
 
+    # Normalize texts before computing metrics
+    hypotheses = [normalize_text(h) for h in hypotheses]
+    references = [normalize_text(r) for r in references]
+
     output = process_words(references, hypotheses)
 
     return {
@@ -61,6 +83,10 @@ def compute_single_sample_metrics(
     """
     if not hypothesis or not reference:
         return {"wer": 1.0, "cer": 1.0}
+
+    # Normalize texts before computing metrics
+    hypothesis = normalize_text(hypothesis)
+    reference = normalize_text(reference)
 
     return {
         "wer": wer(reference, hypothesis),
