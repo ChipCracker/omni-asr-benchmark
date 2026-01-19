@@ -58,6 +58,8 @@ class ParakeetEvaluator(BaseEvaluator):
                     if torch.cuda.is_available():
                         self._model = self._model.cuda()
                         logger.info("Parakeet model loaded on CUDA")
+                        # Warmup to initialize CUDA context
+                        self._warmup()
                     else:
                         logger.info("Parakeet model loaded on CPU")
                 except Exception:
@@ -69,6 +71,24 @@ class ParakeetEvaluator(BaseEvaluator):
                     "Install with: pip install nemo-toolkit[asr]"
                 ) from e
         return self._model
+
+    def _warmup(self) -> None:
+        """Run a dummy inference to warm up CUDA context."""
+        import tempfile
+        import numpy as np
+        import soundfile as sf
+
+        # Create a short silent audio file for warmup
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as f:
+            # 0.5 seconds of silence at 16kHz
+            silence = np.zeros(8000, dtype=np.float32)
+            sf.write(f.name, silence, 16000)
+
+            try:
+                self._model.transcribe([f.name], batch_size=1)
+                logger.info("Parakeet warmup completed")
+            except Exception as e:
+                logger.warning(f"Parakeet warmup failed (will retry on first batch): {e}")
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe a batch of audio files using Parakeet.
