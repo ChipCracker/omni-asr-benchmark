@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Any
 
-from jiwer import wer, cer, compute_measures
+from jiwer import wer, cer, process_words
 
 
 def compute_asr_metrics(
@@ -34,14 +34,14 @@ def compute_asr_metrics(
             "num_samples": 0,
         }
 
-    measures = compute_measures(references, hypotheses)
+    output = process_words(references, hypotheses)
 
     return {
-        "wer": measures["wer"],
+        "wer": output.wer,
         "cer": cer(references, hypotheses),
-        "substitutions": measures["substitutions"],
-        "deletions": measures["deletions"],
-        "insertions": measures["insertions"],
+        "substitutions": output.substitutions,
+        "deletions": output.deletions,
+        "insertions": output.insertions,
         "num_samples": len(hypotheses),
     }
 
