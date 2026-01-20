@@ -90,34 +90,16 @@ Each result file contains:
 
 ## Analyzing Results
 
-Use the analysis script to inspect evaluation results in detail:
+Use the analysis script to print a minimal summary:
 
 ```bash
 python scripts/analyze_results.py results/openai_whisper-large-v3_evaluation.json
 ```
 
-### Analysis Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `result_file` | Path to evaluation JSON file | (required) |
-| `--top-n` | Number of best/worst samples to show | `5` |
-| `--show-speakers` | Show per-speaker WER statistics | `False` |
-| `--show-examples` | Show reference vs. hypothesis examples | `False` |
-
-### Example with All Options
-
-```bash
-python scripts/analyze_results.py results/openai_whisper-large-v3_evaluation.json \
-    --top-n 10 --show-speakers --show-examples
-```
-
-The analysis includes:
-- Overview (model, dataset, aggregate metrics)
-- Distribution statistics (min, max, mean, median, std for WER/CER)
-- Top-N best and worst samples by WER
-- Per-speaker breakdown (with `--show-speakers`)
-- Side-by-side REF vs HYP transcriptions (with `--show-examples`)
+The summary includes:
+- Model, dataset, language, timestamp
+- Total samples and skipped count
+- Dialect WER/CER (and ORT WER/CER if available)
 
 ## Project Structure
 
