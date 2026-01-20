@@ -95,6 +95,26 @@ class ParakeetEvaluator(BaseEvaluator):
         model = self._get_model()
 
         try:
+            # Log audio file info for first file in batch to diagnose format issues
+            if audio_paths:
+                import soundfile as sf
+                info = sf.info(audio_paths[0])
+                logger.info(
+                    f"Audio file info: {audio_paths[0]} - "
+                    f"sample_rate={info.samplerate}Hz, channels={info.channels}, "
+                    f"duration={info.duration:.2f}s, format={info.format}"
+                )
+                if info.samplerate != 16000:
+                    logger.warning(
+                        f"Audio sample rate is {info.samplerate}Hz, but Parakeet expects 16000Hz. "
+                        "This may cause empty transcriptions."
+                    )
+                if info.channels != 1:
+                    logger.warning(
+                        f"Audio has {info.channels} channels, but Parakeet expects mono. "
+                        "This may cause issues."
+                    )
+
             transcriptions = model.transcribe(
                 audio_paths,
                 batch_size=self.batch_size,
