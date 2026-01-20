@@ -102,29 +102,40 @@ class ParakeetEvaluator(BaseEvaluator):
         model = self._get_model()
 
         try:
-            # NeMo's transcribe method handles batching internally
             transcriptions = model.transcribe(
                 audio_paths,
                 batch_size=self.batch_size,
             )
 
+            # Debug: Log the actual return type and structure
+            logger.debug(f"Transcribe returned type: {type(transcriptions)}")
+            if transcriptions:
+                if isinstance(transcriptions, (list, tuple)) and len(transcriptions) > 0:
+                    logger.debug(f"First element type: {type(transcriptions[0])}")
+                    logger.debug(f"First element value: {transcriptions[0]}")
+
             # Handle different return types from NeMo models
             if isinstance(transcriptions, tuple):
-                # Some models return (text, logprobs) tuple
+                # Some models return (text, logprobs) or (hypotheses, all_hypotheses) tuple
+                logger.debug(f"Tuple length: {len(transcriptions)}")
                 transcriptions = transcriptions[0]
 
             # Ensure we return strings, not nested structures
             results = []
-            for t in transcriptions:
+            for i, t in enumerate(transcriptions):
                 if isinstance(t, str):
-                    results.append(t.strip())
+                    text = t.strip()
                 elif hasattr(t, "text"):
-                    results.append(t.text.strip())
+                    text = t.text.strip() if t.text else ""
                 else:
-                    results.append(str(t).strip())
+                    text = str(t).strip()
+
+                if i == 0:
+                    logger.debug(f"Extracted text: '{text}' from {type(t)}")
+                results.append(text)
 
             return results
 
         except Exception as e:
-            logger.error(f"Error transcribing batch: {e}")
+            logger.error(f"Error transcribing batch: {e}", exc_info=True)
             return [""] * len(audio_paths)
