@@ -109,18 +109,18 @@ class WhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
+        # Batch processing with HuggingFace Pipeline
+        outputs = pipe(
+            audio_paths,
+            generate_kwargs=generate_kwargs,
+            return_timestamps=True,  # Required for audio > 30 seconds
+            batch_size=self.batch_size,
+        )
+
+        # Extract results
         results = []
-        for audio_path in audio_paths:
-            try:
-                output = pipe(
-                    audio_path,
-                    generate_kwargs=generate_kwargs,
-                    return_timestamps=True,  # Required for audio > 30 seconds
-                )
-                text = output.get("text", "").strip()
-                results.append(text)
-            except Exception as e:
-                logger.error(f"Error transcribing {audio_path}: {e}")
-                results.append("")
+        for output in outputs:
+            text = output.get("text", "").strip()
+            results.append(text)
 
         return results

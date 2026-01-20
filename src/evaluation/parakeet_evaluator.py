@@ -32,6 +32,8 @@ class ParakeetEvaluator(BaseEvaluator):
         """
         super().__init__(model_name, language, batch_size)
         self._model = None
+        self._device = "cpu"
+        self._cuda_graphs_disabled = False
 
         # Warn if using non-English language with Parakeet
         if not language.startswith("eng"):
@@ -39,6 +41,101 @@ class ParakeetEvaluator(BaseEvaluator):
                 f"Parakeet models are primarily trained on English. "
                 f"Performance may be degraded for language: {language}"
             )
+
+    def _set_cfg_value(self, cfg, key: str, value) -> bool:
+        """Set a config key if it exists."""
+        if cfg is None:
+            return False
+        try:
+            if isinstance(cfg, dict):
+                if key in cfg:
+                    cfg[key] = value
+                    return True
+                return False
+        except Exception:
+            pass
+        try:
+            if hasattr(cfg, key):
+                setattr(cfg, key, value)
+                return True
+        except Exception:
+            pass
+        try:
+            if key in cfg:
+                cfg[key] = value
+                return True
+        except Exception:
+            pass
+        return False
+
+    def _disable_cuda_graphs(self) -> bool:
+        """Disable CUDA graphs in decoding config when available."""
+        model = self._model
+        if model is None:
+            return False
+        try:
+            decoding_cfg = model.cfg.decoding
+        except Exception:
+            return False
+
+        changed = False
+        for key in ("use_cuda_graphs", "cuda_graphs", "cuda_graph"):
+            changed |= self._set_cfg_value(decoding_cfg, key, False)
+
+        for section_name in ("greedy", "beam", "tdt", "rnnt"):
+            section = None
+            try:
+                section = getattr(decoding_cfg, section_name)
+            except Exception:
+                section = None
+            if section is None:
+                try:
+                    section = decoding_cfg.get(section_name)
+                except Exception:
+                    section = None
+            if section is not None:
+                for key in ("use_cuda_graphs", "cuda_graphs", "cuda_graph"):
+                    changed |= self._set_cfg_value(section, key, False)
+
+        if changed and hasattr(model, "change_decoding_strategy"):
+            try:
+                model.change_decoding_strategy(decoding_cfg)
+            except Exception as e:
+                logger.debug(f"Failed to apply decoding config changes: {e}")
+
+        if changed:
+            self._cuda_graphs_disabled = True
+        return changed
+
+    def _is_cuda_failure(self, error: Exception) -> bool:
+        text = str(error).lower()
+        return (
+            "cuda failure" in text
+            or "cuda error" in text
+            or "cuda graph" in text
+            or "cudagraph" in text
+        )
+
+    def _maybe_recover_from_cuda_failure(self, error: Exception) -> bool:
+        if not self._is_cuda_failure(error):
+            return False
+
+        if not self._cuda_graphs_disabled and self._disable_cuda_graphs():
+            logger.warning(f"Disabled CUDA graphs after failure: {error}")
+            return True
+
+        if self._device == "cuda":
+            try:
+                import torch
+                self._model = self._model.cpu()
+                self._device = "cpu"
+                torch.cuda.empty_cache()
+                logger.warning(f"Falling back to CPU after CUDA failure: {error}")
+                return True
+            except Exception:
+                return False
+
+        return False
 
     def _get_model(self):
         """Lazy-load the NeMo ASR model."""
@@ -51,18 +148,24 @@ class ParakeetEvaluator(BaseEvaluator):
                 self._model = nemo_asr.models.ASRModel.from_pretrained(
                     model_name=self.model_name
                 )
+                self._model.eval()
 
                 # Move to GPU if available
                 try:
                     import torch
                     if torch.cuda.is_available():
                         self._model = self._model.cuda()
+                        self._device = "cuda"
+                        if self._disable_cuda_graphs():
+                            logger.info("Disabled CUDA graphs for Parakeet decoding")
                         logger.info("Parakeet model loaded on CUDA")
                         # Warmup to initialize CUDA context
                         self._warmup()
                     else:
+                        self._device = "cpu"
                         logger.info("Parakeet model loaded on CPU")
                 except Exception:
+                    self._device = "cpu"
                     logger.info("Parakeet model loaded on CPU")
 
             except ImportError as e:
@@ -88,6 +191,16 @@ class ParakeetEvaluator(BaseEvaluator):
                 self._model.transcribe([f.name], batch_size=1)
                 logger.info("Parakeet warmup completed")
             except Exception as e:
+                if self._maybe_recover_from_cuda_failure(e):
+                    try:
+                        self._model.transcribe([f.name], batch_size=1)
+                        logger.info("Parakeet warmup completed after recovery")
+                        return
+                    except Exception as retry_error:
+                        logger.warning(
+                            f"Parakeet warmup failed after recovery (will retry on first batch): {retry_error}"
+                        )
+                        return
                 logger.warning(f"Parakeet warmup failed (will retry on first batch): {e}")
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
@@ -115,10 +228,20 @@ class ParakeetEvaluator(BaseEvaluator):
                         "This may cause issues."
                     )
 
-            transcriptions = model.transcribe(
-                audio_paths,
-                batch_size=self.batch_size,
-            )
+            try:
+                transcriptions = model.transcribe(
+                    audio_paths,
+                    batch_size=self.batch_size,
+                )
+            except Exception as e:
+                if self._maybe_recover_from_cuda_failure(e):
+                    model = self._model
+                    transcriptions = model.transcribe(
+                        audio_paths,
+                        batch_size=self.batch_size,
+                    )
+                else:
+                    raise
 
             # INFO-level logging to see what the model returns
             logger.info(f"Transcribe returned type: {type(transcriptions)}")

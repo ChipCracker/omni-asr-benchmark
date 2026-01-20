@@ -88,6 +88,37 @@ Each result file contains:
 - Aggregate WER/CER metrics
 - Per-sample results with hypotheses and references
 
+## Analyzing Results
+
+Use the analysis script to inspect evaluation results in detail:
+
+```bash
+python scripts/analyze_results.py results/openai_whisper-large-v3_evaluation.json
+```
+
+### Analysis Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `result_file` | Path to evaluation JSON file | (required) |
+| `--top-n` | Number of best/worst samples to show | `5` |
+| `--show-speakers` | Show per-speaker WER statistics | `False` |
+| `--show-examples` | Show reference vs. hypothesis examples | `False` |
+
+### Example with All Options
+
+```bash
+python scripts/analyze_results.py results/openai_whisper-large-v3_evaluation.json \
+    --top-n 10 --show-speakers --show-examples
+```
+
+The analysis includes:
+- Overview (model, dataset, aggregate metrics)
+- Distribution statistics (min, max, mean, median, std for WER/CER)
+- Top-N best and worst samples by WER
+- Per-speaker breakdown (with `--show-speakers`)
+- Side-by-side REF vs HYP transcriptions (with `--show-examples`)
+
 ## Project Structure
 
 ```
@@ -103,7 +134,8 @@ omni-asr-test/
 │       ├── parakeet_evaluator.py
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
-│   └── evaluate_rvg1.py      # Main evaluation script
+│   ├── evaluate_rvg1.py      # Main evaluation script
+│   └── analyze_results.py    # Result analysis script
 ├── results/                   # Evaluation output
 └── requirements.txt
 ```
