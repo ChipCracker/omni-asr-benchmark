@@ -91,14 +91,7 @@ class ParakeetEvaluator(BaseEvaluator):
                 logger.warning(f"Parakeet warmup failed (will retry on first batch): {e}")
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
-        """Transcribe a batch of audio files using Parakeet.
-
-        Args:
-            audio_paths: List of paths to audio files.
-
-        Returns:
-            List of transcription strings.
-        """
+        """Transcribe a batch of audio files using Parakeet."""
         model = self._get_model()
 
         try:
@@ -107,20 +100,24 @@ class ParakeetEvaluator(BaseEvaluator):
                 batch_size=self.batch_size,
             )
 
-            # Debug: Log the actual return type and structure
-            logger.debug(f"Transcribe returned type: {type(transcriptions)}")
+            # INFO-level logging to see what the model returns
+            logger.info(f"Transcribe returned type: {type(transcriptions)}")
             if transcriptions:
                 if isinstance(transcriptions, (list, tuple)) and len(transcriptions) > 0:
-                    logger.debug(f"First element type: {type(transcriptions[0])}")
-                    logger.debug(f"First element value: {transcriptions[0]}")
+                    first = transcriptions[0]
+                    logger.info(f"First element type: {type(first)}")
+                    logger.info(f"First element repr: {repr(first)[:200]}")
+                    if hasattr(first, '__dict__'):
+                        logger.info(f"First element attrs: {list(first.__dict__.keys())}")
+                    if hasattr(first, 'text'):
+                        logger.info(f"First element .text: '{first.text}'")
 
-            # Handle different return types from NeMo models
-            if isinstance(transcriptions, tuple):
-                # Some models return (text, logprobs) or (hypotheses, all_hypotheses) tuple
-                logger.debug(f"Tuple length: {len(transcriptions)}")
+            # Handle tuple return type from RNNT models
+            if isinstance(transcriptions, tuple) and len(transcriptions) >= 1:
+                logger.info(f"Extracting from tuple of length {len(transcriptions)}")
                 transcriptions = transcriptions[0]
 
-            # Ensure we return strings, not nested structures
+            # Extract text from each transcription
             results = []
             for i, t in enumerate(transcriptions):
                 if isinstance(t, str):
@@ -131,7 +128,7 @@ class ParakeetEvaluator(BaseEvaluator):
                     text = str(t).strip()
 
                 if i == 0:
-                    logger.debug(f"Extracted text: '{text}' from {type(t)}")
+                    logger.info(f"Extracted text: '{text}' (from {type(t).__name__})")
                 results.append(text)
 
             return results
