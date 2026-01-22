@@ -46,42 +46,14 @@ class VibeVoiceEvaluator(BaseEvaluator):
         """Lazy-load the VibeVoice model and processor."""
         if self._model is None:
             logger.info(f"Loading VibeVoice-ASR model: {self.model_name}")
+
+            # Check for vibevoice package first
             try:
-                import torch
                 from vibevoice.modular.modeling_vibevoice_asr import (
                     VibeVoiceASRForConditionalGeneration,
                 )
                 from vibevoice.processor.vibevoice_asr_processor import (
                     VibeVoiceASRProcessor,
-                )
-
-                device = "cuda" if torch.cuda.is_available() else "cpu"
-                dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
-
-                # Load processor
-                logger.info("Loading VibeVoice processor...")
-                self._processor = VibeVoiceASRProcessor.from_pretrained(
-                    self.model_name,
-                    llm_model="Qwen/Qwen2.5-7B",
-                )
-
-                # Load model
-                logger.info("Loading VibeVoice model...")
-                attn_impl = "flash_attention_2" if torch.cuda.is_available() else "eager"
-                self._model = VibeVoiceASRForConditionalGeneration.from_pretrained(
-                    self.model_name,
-                    torch_dtype=dtype,
-                    attn_implementation=attn_impl,
-                )
-                self._model = self._model.to(device)
-                self._model.eval()
-
-                self._device = device
-                self._dtype = dtype
-
-                logger.info(
-                    f"VibeVoice-ASR loaded on {device} with dtype={dtype}, "
-                    f"attention={attn_impl}"
                 )
             except ImportError as e:
                 raise ImportError(
@@ -91,6 +63,49 @@ class VibeVoiceEvaluator(BaseEvaluator):
                     "  cd VibeVoice\n"
                     "  pip install -e .[asr]"
                 ) from e
+
+            import torch
+
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+
+            # Load processor
+            logger.info("Loading VibeVoice processor...")
+            self._processor = VibeVoiceASRProcessor.from_pretrained(
+                self.model_name,
+                llm_model="Qwen/Qwen2.5-7B",
+            )
+
+            # Load model
+            logger.info("Loading VibeVoice model...")
+            attn_impl = "flash_attention_2" if torch.cuda.is_available() else "eager"
+            try:
+                self._model = VibeVoiceASRForConditionalGeneration.from_pretrained(
+                    self.model_name,
+                    torch_dtype=dtype,
+                    attn_implementation=attn_impl,
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to load with {attn_impl}, trying eager attention: {e}"
+                )
+                self._model = VibeVoiceASRForConditionalGeneration.from_pretrained(
+                    self.model_name,
+                    torch_dtype=dtype,
+                    attn_implementation="eager",
+                )
+                attn_impl = "eager"
+
+            self._model = self._model.to(device)
+            self._model.eval()
+
+            self._device = device
+            self._dtype = dtype
+
+            logger.info(
+                f"VibeVoice-ASR loaded on {device} with dtype={dtype}, "
+                f"attention={attn_impl}"
+            )
         return self._model, self._processor
 
     def _extract_plain_text(self, raw_output: str) -> str:
