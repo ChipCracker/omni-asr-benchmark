@@ -79,6 +79,9 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     elif "parakeet" in model_lower:
         from .parakeet_evaluator import ParakeetEvaluator
         return ParakeetEvaluator(model_name, language, batch_size)
+    elif "vibevoice" in model_lower:
+        from .vibevoice_evaluator import VibeVoiceEvaluator
+        return VibeVoiceEvaluator(model_name, language, batch_size)
     else:
         # Default to OmniASR evaluator
         return OmniASREvaluator(model_name, language, batch_size)

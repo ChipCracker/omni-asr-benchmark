@@ -7,6 +7,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **OmniASR** (default) - Facebook's omnilingual ASR model
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
+- **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
 ## Installation
 
@@ -30,6 +31,11 @@ pip install transformers torch accelerate
 
 # Install NeMo dependencies (optional, for Parakeet)
 pip install nemo-toolkit[asr]
+
+# Install VibeVoice dependencies (optional, for VibeVoice-ASR)
+git clone https://github.com/microsoft/VibeVoice.git
+cd VibeVoice
+pip install -e .[asr]
 ```
 
 ## Configuration
@@ -62,6 +68,14 @@ python scripts/evaluate_rvg1.py --model-card openai/whisper-large-v3
 python scripts/evaluate_rvg1.py --model-card nvidia/parakeet-ctc-1.1b
 ```
 
+### Evaluate with VibeVoice
+
+```bash
+python scripts/evaluate_rvg1.py --model-card microsoft/VibeVoice-ASR --batch-size 1
+```
+
+Note: VibeVoice-ASR is a 9B parameter model requiring ~18-20 GB VRAM. It supports up to 60 minutes of continuous audio and includes speaker diarization (stripped for WER evaluation).
+
 ### Command Line Options
 
 | Option | Description | Default |
@@ -82,6 +96,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/omniASR_LLM_Unlimited_7B_v2_evaluation.json`
 - `results/openai_whisper-large-v3_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
+- `results/microsoft_VibeVoice-ASR_evaluation.json`
 
 Each result file contains:
 - Model and dataset metadata
@@ -114,6 +129,7 @@ omni-asr-test/
 │       ├── evaluator.py       # OmniASR evaluator + factory
 │       ├── whisper_evaluator.py
 │       ├── parakeet_evaluator.py
+│       ├── vibevoice_evaluator.py
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
 │   ├── evaluate_rvg1.py      # Main evaluation script
