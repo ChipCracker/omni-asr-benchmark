@@ -30,6 +30,9 @@ class SampleResult:
     ort_cer: Optional[float]
     duration: float
     speaker_id: Optional[str] = None
+    raw_hypothesis: Optional[str] = None  # Full model output (e.g., JSON with speakers)
+    selected_speaker: Optional[int] = None  # Selected speaker ID for multi-speaker models
+    all_speakers: Optional[Dict[str, Any]] = None  # All speaker transcripts + metrics
 
 
 @dataclass
