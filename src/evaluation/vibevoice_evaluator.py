@@ -121,6 +121,7 @@ class VibeVoiceEvaluator(BaseEvaluator):
         Args:
             raw_output: Raw model output with structure like:
                 "[00:00.00 - 00:05.00] Speaker 1: Hello world"
+                or JSON format with Content fields.
 
         Returns:
             Plain text without timestamps or speaker tags.
@@ -128,6 +129,13 @@ class VibeVoiceEvaluator(BaseEvaluator):
         if not raw_output:
             return ""
 
+        # Try to extract Content fields from JSON-like output
+        # This handles both complete and incomplete JSON (e.g., missing closing ])
+        content_matches = re.findall(r'"Content"\s*:\s*"([^"]*)"', raw_output)
+        if content_matches:
+            return " ".join(content_matches)
+
+        # Fallback: Remove timestamps and speaker tags from plain text format
         lines = raw_output.strip().split("\n")
         text_parts = []
 
@@ -274,40 +282,51 @@ class VibeVoiceEvaluator(BaseEvaluator):
         # Try to extract JSON array from output
         # Format: "assistant [{...},{...}]" or just "[{...},{...}]"
         json_match = re.search(r"\[.*\]", raw_output, re.DOTALL)
-        if not json_match:
-            # Not JSON format, return as single speaker
-            return {0: self._extract_plain_text(raw_output)}
+        if json_match:
+            try:
+                segments = json.loads(json_match.group())
+                if isinstance(segments, list) and segments:
+                    # Group by speaker
+                    speaker_texts: Dict[int, List[str]] = {}
+                    for segment in segments:
+                        if not isinstance(segment, dict):
+                            continue
+                        speaker_id = segment.get("Speaker", 0)
+                        content = segment.get("Content", "")
+                        if speaker_id not in speaker_texts:
+                            speaker_texts[speaker_id] = []
+                        if content:
+                            speaker_texts[speaker_id].append(content)
 
-        try:
-            segments = json.loads(json_match.group())
-        except json.JSONDecodeError:
-            # Invalid JSON, return as single speaker
-            return {0: self._extract_plain_text(raw_output)}
+                    # Concatenate texts per speaker
+                    if speaker_texts:
+                        return {
+                            speaker_id: " ".join(texts)
+                            for speaker_id, texts in speaker_texts.items()
+                        }
+            except json.JSONDecodeError:
+                pass  # Fall through to regex-based extraction
 
-        if not isinstance(segments, list) or not segments:
-            return {0: self._extract_plain_text(raw_output)}
+        # Fallback for incomplete JSON: extract Speaker and Content fields via regex
+        # This handles cases where the closing ] is missing
+        content_pattern = r'"Speaker"\s*:\s*(\d+)[^}]*"Content"\s*:\s*"([^"]*)"'
+        matches = re.findall(content_pattern, raw_output)
+        if matches:
+            speaker_texts: Dict[int, List[str]] = {}
+            for speaker_id_str, content in matches:
+                speaker_id = int(speaker_id_str)
+                if speaker_id not in speaker_texts:
+                    speaker_texts[speaker_id] = []
+                if content:
+                    speaker_texts[speaker_id].append(content)
+            if speaker_texts:
+                return {
+                    speaker_id: " ".join(texts)
+                    for speaker_id, texts in speaker_texts.items()
+                }
 
-        # Group by speaker
-        speaker_texts: Dict[int, List[str]] = {}
-        for segment in segments:
-            if not isinstance(segment, dict):
-                continue
-            speaker_id = segment.get("Speaker", 0)
-            content = segment.get("Content", "")
-            if speaker_id not in speaker_texts:
-                speaker_texts[speaker_id] = []
-            if content:
-                speaker_texts[speaker_id].append(content)
-
-        # Concatenate texts per speaker
-        result = {}
-        for speaker_id, texts in speaker_texts.items():
-            result[speaker_id] = " ".join(texts)
-
-        if not result:
-            return {0: self._extract_plain_text(raw_output)}
-
-        return result
+        # Last fallback: extract plain text
+        return {0: self._extract_plain_text(raw_output)}
 
     def _select_best_speaker(
         self,
