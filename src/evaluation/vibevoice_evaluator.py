@@ -112,6 +112,48 @@ class VibeVoiceEvaluator(BaseEvaluator):
             )
         return self._model, self._processor
 
+    def _truncate_generation_loop(self, text: str) -> str:
+        """Detect and truncate repetitive generation loops.
+
+        VibeVoice sometimes gets stuck in generation loops, producing thousands
+        of repeated words/phrases. This detects such loops and truncates the
+        output to before the loop started.
+
+        Args:
+            text: Text to check for repetitive loops.
+
+        Returns:
+            Truncated text if loop detected, otherwise original text.
+        """
+        words = text.split()
+        if len(words) < 100:
+            return text
+
+        # Check if the last part shows repetitive patterns
+        # Look for 3-word phrases repeated many times
+        last_words = words[-60:]
+        for phrase_len in [3, 4, 5]:
+            if len(last_words) < phrase_len * 3:
+                continue
+            test_phrase = " ".join(last_words[-phrase_len:])
+            if len(test_phrase) < 5:
+                continue
+            # Count occurrences in last 60 words
+            last_text = " ".join(last_words)
+            count = last_text.count(test_phrase)
+            if count >= 5:
+                # Found a loop - find where it starts in the full text
+                full_text = " ".join(words)
+                # Find first occurrence of the repeating phrase
+                first_occurrence = full_text.find(test_phrase)
+                if first_occurrence > 0:
+                    # Truncate just before the loop
+                    truncated = full_text[:first_occurrence].strip()
+                    # Return truncated even if short - better than thousands of garbage words
+                    if truncated:
+                        return truncated
+        return text
+
     def _extract_plain_text(self, raw_output: str) -> str:
         """Extract plain transcription text from VibeVoice structured output.
 
@@ -133,7 +175,15 @@ class VibeVoiceEvaluator(BaseEvaluator):
         # This handles both complete and incomplete JSON (e.g., missing closing ])
         content_matches = re.findall(r'"Content"\s*:\s*"([^"]*)"', raw_output)
         if content_matches:
-            return " ".join(content_matches)
+            result = " ".join(content_matches)
+            return self._truncate_generation_loop(result)
+
+        # Fallback for truncated JSON: Content field without closing quote
+        # This happens when the model output is cut off mid-Content
+        truncated_match = re.search(r'"Content"\s*:\s*"([^"]+)$', raw_output, re.DOTALL)
+        if truncated_match:
+            result = truncated_match.group(1).strip()
+            return self._truncate_generation_loop(result)
 
         # Fallback: Remove timestamps and speaker tags from plain text format
         lines = raw_output.strip().split("\n")
@@ -298,10 +348,10 @@ class VibeVoiceEvaluator(BaseEvaluator):
                         if content:
                             speaker_texts[speaker_id].append(content)
 
-                    # Concatenate texts per speaker
+                    # Concatenate texts per speaker and truncate loops
                     if speaker_texts:
                         return {
-                            speaker_id: " ".join(texts)
+                            speaker_id: self._truncate_generation_loop(" ".join(texts))
                             for speaker_id, texts in speaker_texts.items()
                         }
             except json.JSONDecodeError:
@@ -321,9 +371,18 @@ class VibeVoiceEvaluator(BaseEvaluator):
                     speaker_texts[speaker_id].append(content)
             if speaker_texts:
                 return {
-                    speaker_id: " ".join(texts)
+                    speaker_id: self._truncate_generation_loop(" ".join(texts))
                     for speaker_id, texts in speaker_texts.items()
                 }
+
+        # Fallback for truncated JSON: Content without closing quote (model output cut off)
+        truncated_pattern = r'"Speaker"\s*:\s*(\d+)[^}]*"Content"\s*:\s*"([^"]+)$'
+        truncated_match = re.search(truncated_pattern, raw_output, re.DOTALL)
+        if truncated_match:
+            speaker_id = int(truncated_match.group(1))
+            content = self._truncate_generation_loop(truncated_match.group(2).strip())
+            if content:
+                return {speaker_id: content}
 
         # Last fallback: extract plain text
         return {0: self._extract_plain_text(raw_output)}
