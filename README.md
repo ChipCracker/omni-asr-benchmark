@@ -9,7 +9,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
 - **Canary-Qwen** - NVIDIA NeMo SALM model (e.g., `nvidia/canary-qwen-2.5b`, English-only)
-- **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`)
+- **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`, `mistralai/Voxtral-Small-24B-2507`)
 - **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
@@ -104,10 +104,14 @@ Note: Canary-Qwen is English-only (5.63% mean WER on HuggingFace OpenASR Leaderb
 ### Evaluate with Voxtral
 
 ```bash
+# Voxtral Mini (3B) - ~9.5 GB GPU RAM
 python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-3B-2507
+
+# Voxtral Small (24B) - larger model, better accuracy
+python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Small-24B-2507
 ```
 
-Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Portuguese (pt), Italian (it), Dutch (nl), and Hindi (hi). Requires ~9.5 GB GPU RAM.
+Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Portuguese (pt), Italian (it), Dutch (nl), and Hindi (hi).
 
 ### Evaluate with Phi-4 Multimodal
 
