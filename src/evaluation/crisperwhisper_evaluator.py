@@ -119,6 +119,9 @@ class CrisperWhisperEvaluator(BaseEvaluator):
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe a batch of audio files using CrisperWhisper.
 
+        Following the official HuggingFace example, files are processed individually
+        to avoid timestamp issues with batched processing.
+
         Args:
             audio_paths: List of paths to audio files.
 
@@ -132,17 +135,16 @@ class CrisperWhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
-        # Batch processing with HuggingFace Pipeline
-        outputs = pipe(
-            audio_paths,
-            generate_kwargs=generate_kwargs,
-            batch_size=self.batch_size,
-        )
-
-        # Extract results
+        # Process files individually (like official HuggingFace example)
+        # Batching with return_timestamps='word' can cause timestamp calculation errors
         results = []
-        for output in outputs:
-            text = output.get("text", "").strip()
-            results.append(text)
+        for audio_path in audio_paths:
+            try:
+                output = pipe(audio_path, generate_kwargs=generate_kwargs)
+                text = output.get("text", "").strip()
+                results.append(text)
+            except Exception as e:
+                logger.warning(f"Error transcribing {audio_path}: {e}")
+                results.append("")
 
         return results
