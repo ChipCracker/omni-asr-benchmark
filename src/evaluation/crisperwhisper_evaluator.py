@@ -103,8 +103,8 @@ class CrisperWhisperEvaluator(BaseEvaluator):
                     tokenizer=processor.tokenizer,
                     feature_extractor=processor.feature_extractor,
                     chunk_length_s=30,
-                    batch_size=1,  # Process one file at a time (official recommendation)
-                    return_timestamps=True,
+                    batch_size=16,  # Official recommendation from CrisperWhisper examples
+                    return_timestamps="word",  # CRITICAL: Must be 'word', not True
                     torch_dtype=torch_dtype,
                     device=device,
                 )
@@ -132,10 +132,16 @@ class CrisperWhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
-        # Process files individually (batch_size=1 to avoid tensor mismatches)
+        # Batch processing with HuggingFace Pipeline
+        outputs = pipe(
+            audio_paths,
+            generate_kwargs=generate_kwargs,
+            batch_size=self.batch_size,
+        )
+
+        # Extract results
         results = []
-        for audio_path in audio_paths:
-            output = pipe(audio_path, generate_kwargs=generate_kwargs)
+        for output in outputs:
             text = output.get("text", "").strip()
             results.append(text)
 
