@@ -9,6 +9,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
 - **Canary-Qwen** - NVIDIA NeMo SALM model (e.g., `nvidia/canary-qwen-2.5b`, English-only)
+- **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
 ## Installation
@@ -39,6 +40,10 @@ pip install nemo-toolkit[asr]
 
 # Install NeMo trunk (optional, for Canary-Qwen - requires PyTorch 2.6+)
 pip install 'nemo_toolkit[asr,tts] @ git+https://github.com/NVIDIA/NeMo.git'
+
+# Install Voxtral dependencies (optional, for Voxtral)
+pip install -U transformers
+pip install --upgrade 'mistral-common[audio]'
 
 # Install VibeVoice dependencies (optional, for VibeVoice-ASR)
 git clone https://github.com/microsoft/VibeVoice.git
@@ -92,6 +97,14 @@ python scripts/evaluate_rvg1.py --model-card nvidia/canary-qwen-2.5b
 
 Note: Canary-Qwen is English-only (5.63% mean WER on HuggingFace OpenASR Leaderboard). German evaluation will show degraded results.
 
+### Evaluate with Voxtral
+
+```bash
+python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-3B-2507
+```
+
+Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Portuguese (pt), Italian (it), Dutch (nl), and Hindi (hi). Requires ~9.5 GB GPU RAM.
+
 ### Evaluate with VibeVoice
 
 ```bash
@@ -122,6 +135,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
 - `results/nvidia_canary-qwen-2.5b_evaluation.json`
+- `results/mistralai_Voxtral-Mini-3B-2507_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 
 Each result file contains:
@@ -171,6 +185,7 @@ omni-asr-test/
 │       ├── crisperwhisper_evaluator.py
 │       ├── parakeet_evaluator.py
 │       ├── canary_evaluator.py
+│       ├── voxtral_evaluator.py
 │       ├── vibevoice_evaluator.py
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
