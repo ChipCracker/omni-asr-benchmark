@@ -82,7 +82,7 @@ def plot_results(metrics: List[Dict], output_path: Path = None):
     ax.bar_label(bars2, fmt="%.1f%%", padding=3)
 
     ax.set_ylabel("Word Error Rate (%) - symlog scale")
-    ax.set_title("ASR Model Comparison - WER on BAS RVG1 Dataset")
+    ax.set_title("ASR Model Comparison - WER on BAS RVG1 Dataset (default configuration)")
     ax.set_xticks(x)
     ax.set_xticklabels(models, rotation=15, ha="right")
     ax.legend()
