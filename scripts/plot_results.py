@@ -67,6 +67,16 @@ def plot_results(metrics: List[Dict], output_path: Path = None):
     ax.set_yscale("symlog", linthresh=100, linscale=1)
     ax.set_ylim(0, None)
 
+    # Y-axis ticks at every 10%
+    max_val = max(max(dialect_wers), max(ort_wers))
+    ticks = list(range(0, 101, 10))  # 0, 10, 20, ..., 100
+    if max_val > 100:
+        # Add ticks for logarithmic region
+        ticks.extend([200, 300, 500, 1000])
+        ticks = [t for t in ticks if t <= max_val * 1.5]
+    ax.set_yticks(ticks)
+    ax.set_yticklabels([f"{t}%" for t in ticks])
+
     # Add value labels
     ax.bar_label(bars1, fmt="%.1f%%", padding=3)
     ax.bar_label(bars2, fmt="%.1f%%", padding=3)
