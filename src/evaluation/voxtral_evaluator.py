@@ -68,9 +68,10 @@ class VoxtralEvaluator(BaseEvaluator):
 
             except ImportError as e:
                 raise ImportError(
-                    "Voxtral support requires transformers and mistral-common. "
-                    "Install with: pip install -U transformers && "
-                    "pip install --upgrade 'mistral-common[audio]'"
+                    f"Voxtral support requires transformers>=4.52.0 and mistral-common. "
+                    f"Install with: pip install -U transformers && "
+                    f"pip install --upgrade 'mistral-common[audio]'. "
+                    f"Original error: {e}"
                 ) from e
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
