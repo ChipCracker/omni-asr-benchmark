@@ -73,7 +73,11 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     """
     model_lower = model_name.lower()
 
-    if "whisper" in model_lower:
+    # Check CrisperWhisper before generic whisper (since it contains "whisper")
+    if "crisperwhisper" in model_lower or "crisper" in model_lower:
+        from .crisperwhisper_evaluator import CrisperWhisperEvaluator
+        return CrisperWhisperEvaluator(model_name, language, batch_size)
+    elif "whisper" in model_lower:
         from .whisper_evaluator import WhisperEvaluator
         return WhisperEvaluator(model_name, language, batch_size)
     elif "parakeet" in model_lower:

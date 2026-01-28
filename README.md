@@ -6,6 +6,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 
 - **OmniASR** (default) - Facebook's omnilingual ASR model
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
+- **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
@@ -28,6 +29,9 @@ pip install git+https://github.com/facebookresearch/omnilingual-asr.git
 
 # Install Whisper dependencies (optional)
 pip install transformers torch accelerate
+
+# Install CrisperWhisper dependencies (optional, for CrisperWhisper)
+pip install git+https://github.com/nyrahealth/transformers.git@crisper_whisper
 
 # Install NeMo dependencies (optional, for Parakeet)
 pip install nemo-toolkit[asr]
@@ -62,6 +66,14 @@ python scripts/evaluate_rvg1.py
 python scripts/evaluate_rvg1.py --model-card openai/whisper-large-v3
 ```
 
+### Evaluate with CrisperWhisper
+
+```bash
+python scripts/evaluate_rvg1.py --model-card nyrahealth/CrisperWhisper
+```
+
+Note: CrisperWhisper is a fine-tuned Whisper Large V3 that provides verbatim transcription (including filler words like "um", "uh") and improved word-level timestamps.
+
 ### Evaluate with Parakeet
 
 ```bash
@@ -95,6 +107,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 
 - `results/omniASR_LLM_Unlimited_7B_v2_evaluation.json`
 - `results/openai_whisper-large-v3_evaluation.json`
+- `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 
@@ -142,6 +155,7 @@ omni-asr-test/
 │       ├── base_evaluator.py  # Abstract base evaluator
 │       ├── evaluator.py       # OmniASR evaluator + factory
 │       ├── whisper_evaluator.py
+│       ├── crisperwhisper_evaluator.py
 │       ├── parakeet_evaluator.py
 │       ├── vibevoice_evaluator.py
 │       └── metrics.py         # WER/CER computation
