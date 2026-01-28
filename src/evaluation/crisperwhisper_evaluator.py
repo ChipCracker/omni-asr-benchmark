@@ -61,7 +61,7 @@ class CrisperWhisperEvaluator(BaseEvaluator):
         self,
         model_name: str = "nyrahealth/CrisperWhisper",
         language: str = "deu_Latn",
-        batch_size: int = 4,
+        batch_size: int = 16,
     ) -> None:
         """Initialize the CrisperWhisper evaluator.
 
@@ -82,7 +82,7 @@ class CrisperWhisperEvaluator(BaseEvaluator):
                 import torch
                 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
-                device = "cuda:0" if torch.cuda.is_available() else "cpu"
+                device = "cuda" if torch.cuda.is_available() else "cpu"
                 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
                 # Load model explicitly (required for CrisperWhisper)
