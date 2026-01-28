@@ -8,6 +8,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
+- **Canary-Qwen** - NVIDIA NeMo SALM model (e.g., `nvidia/canary-qwen-2.5b`, English-only)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
 ## Installation
@@ -35,6 +36,9 @@ pip install git+https://github.com/nyrahealth/transformers.git@crisper_whisper
 
 # Install NeMo dependencies (optional, for Parakeet)
 pip install nemo-toolkit[asr]
+
+# Install NeMo trunk (optional, for Canary-Qwen - requires PyTorch 2.6+)
+pip install 'nemo_toolkit[asr,tts] @ git+https://github.com/NVIDIA/NeMo.git'
 
 # Install VibeVoice dependencies (optional, for VibeVoice-ASR)
 git clone https://github.com/microsoft/VibeVoice.git
@@ -80,6 +84,14 @@ Note: CrisperWhisper is a fine-tuned Whisper Large V3 that provides verbatim tra
 python scripts/evaluate_rvg1.py --model-card nvidia/parakeet-ctc-1.1b
 ```
 
+### Evaluate with Canary-Qwen
+
+```bash
+python scripts/evaluate_rvg1.py --model-card nvidia/canary-qwen-2.5b
+```
+
+Note: Canary-Qwen is English-only (5.63% mean WER on HuggingFace OpenASR Leaderboard). German evaluation will show degraded results.
+
 ### Evaluate with VibeVoice
 
 ```bash
@@ -109,6 +121,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/openai_whisper-large-v3_evaluation.json`
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
+- `results/nvidia_canary-qwen-2.5b_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 
 Each result file contains:
@@ -157,6 +170,7 @@ omni-asr-test/
 │       ├── whisper_evaluator.py
 │       ├── crisperwhisper_evaluator.py
 │       ├── parakeet_evaluator.py
+│       ├── canary_evaluator.py
 │       ├── vibevoice_evaluator.py
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
