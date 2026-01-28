@@ -54,17 +54,22 @@ class VoxtralEvaluator(BaseEvaluator):
             try:
                 import torch
                 from transformers import AutoProcessor, VoxtralForConditionalGeneration
+                from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
                 # Workaround for NotImplementedError in tokenizer __repr__
                 # The Tekken tokenizer doesn't implement added_tokens_decoder,
                 # which gets called during logger.info(f"Processor {processor}")
-                # Temporarily disable all logging to avoid triggering __repr__
-                previous_level = logging.root.manager.disable
-                logging.disable(logging.CRITICAL)
+                # Monkey-patch to return empty dict instead of raising
+                original_added_tokens_decoder = PreTrainedTokenizerBase.added_tokens_decoder
+                PreTrainedTokenizerBase.added_tokens_decoder = property(
+                    lambda self: {}
+                )
+
                 try:
                     self._processor = AutoProcessor.from_pretrained(self.model_name)
                 finally:
-                    logging.disable(previous_level)
+                    # Restore original property
+                    PreTrainedTokenizerBase.added_tokens_decoder = original_added_tokens_decoder
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 self._model = VoxtralForConditionalGeneration.from_pretrained(
