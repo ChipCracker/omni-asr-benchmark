@@ -116,6 +116,20 @@ The summary includes:
 - Total samples and skipped count
 - Dialect WER/CER (and ORT WER/CER if available)
 
+## Visualizing Results
+
+Generate a comparison bar chart of all evaluation results:
+
+```bash
+python scripts/plot_results.py
+```
+
+This creates `results/comparison_chart.png` with:
+- Grouped bars for Dialect WER and ORT WER per model
+- Error bars showing standard deviation across samples
+- Symlog scale to handle WER values >100%
+- Models sorted by ORT WER (ascending)
+
 ## Project Structure
 
 ```
@@ -133,7 +147,8 @@ omni-asr-test/
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
 │   ├── evaluate_rvg1.py      # Main evaluation script
-│   └── analyze_results.py    # Result analysis script
+│   ├── analyze_results.py    # Result analysis script
+│   └── plot_results.py       # Visualization script
 ├── results/                   # Evaluation output
 └── requirements.txt
 ```
