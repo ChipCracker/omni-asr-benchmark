@@ -80,16 +80,33 @@ class CrisperWhisperEvaluator(BaseEvaluator):
             logger.info(f"Loading CrisperWhisper pipeline: {self.model_name}")
             try:
                 import torch
-                from transformers import pipeline
+                from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
                 device = "cuda:0" if torch.cuda.is_available() else "cpu"
                 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
+                # Load model explicitly (required for CrisperWhisper)
+                model = AutoModelForSpeechSeq2Seq.from_pretrained(
+                    self.model_name,
+                    torch_dtype=torch_dtype,
+                    low_cpu_mem_usage=True,
+                    use_safetensors=True,
+                )
+                model.to(device)
+
+                # Load processor for tokenizer and feature extractor
+                processor = AutoProcessor.from_pretrained(self.model_name)
+
                 self._pipeline = pipeline(
                     "automatic-speech-recognition",
-                    model=self.model_name,
-                    device=device,
+                    model=model,
+                    tokenizer=processor.tokenizer,
+                    feature_extractor=processor.feature_extractor,
+                    chunk_length_s=30,
+                    batch_size=1,  # Process one file at a time (official recommendation)
+                    return_timestamps=True,
                     torch_dtype=torch_dtype,
+                    device=device,
                 )
                 logger.info(f"CrisperWhisper pipeline loaded on {device}")
             except ImportError as e:
@@ -115,17 +132,10 @@ class CrisperWhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
-        # Batch processing with HuggingFace Pipeline
-        outputs = pipe(
-            audio_paths,
-            generate_kwargs=generate_kwargs,
-            return_timestamps=True,  # Required for audio > 30 seconds
-            batch_size=self.batch_size,
-        )
-
-        # Extract results
+        # Process files individually (batch_size=1 to avoid tensor mismatches)
         results = []
-        for output in outputs:
+        for audio_path in audio_paths:
+            output = pipe(audio_path, generate_kwargs=generate_kwargs)
             text = output.get("text", "").strip()
             results.append(text)
 
