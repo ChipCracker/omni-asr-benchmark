@@ -103,8 +103,8 @@ class CrisperWhisperEvaluator(BaseEvaluator):
                     tokenizer=processor.tokenizer,
                     feature_extractor=processor.feature_extractor,
                     chunk_length_s=30,
-                    batch_size=16,  # Official recommendation from CrisperWhisper examples
-                    return_timestamps="word",  # CRITICAL: Must be 'word', not True
+                    batch_size=16,
+                    return_timestamps=False,  # Disabled - timestamps cause errors with some audio
                     torch_dtype=torch_dtype,
                     device=device,
                 )
@@ -119,9 +119,6 @@ class CrisperWhisperEvaluator(BaseEvaluator):
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe a batch of audio files using CrisperWhisper.
 
-        Following the official HuggingFace example, files are processed individually
-        to avoid timestamp issues with batched processing.
-
         Args:
             audio_paths: List of paths to audio files.
 
@@ -135,16 +132,16 @@ class CrisperWhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
-        # Process files individually (like official HuggingFace example)
-        # Batching with return_timestamps='word' can cause timestamp calculation errors
+        # Batch processing (timestamps disabled to avoid calculation errors)
+        outputs = pipe(
+            audio_paths,
+            generate_kwargs=generate_kwargs,
+            batch_size=self.batch_size,
+        )
+
         results = []
-        for audio_path in audio_paths:
-            try:
-                output = pipe(audio_path, generate_kwargs=generate_kwargs)
-                text = output.get("text", "").strip()
-                results.append(text)
-            except Exception as e:
-                logger.warning(f"Error transcribing {audio_path}: {e}")
-                results.append("")
+        for output in outputs:
+            text = output.get("text", "").strip()
+            results.append(text)
 
         return results
