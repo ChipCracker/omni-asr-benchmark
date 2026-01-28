@@ -92,6 +92,9 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     elif "voxtral" in model_lower:
         from .voxtral_evaluator import VoxtralEvaluator
         return VoxtralEvaluator(model_name, language, batch_size)
+    elif "phi-4" in model_lower or "phi4" in model_lower:
+        from .phi4_evaluator import Phi4Evaluator
+        return Phi4Evaluator(model_name, language, batch_size)
     else:
         # Default to OmniASR evaluator
         return OmniASREvaluator(model_name, language, batch_size)

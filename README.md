@@ -10,6 +10,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
 - **Canary-Qwen** - NVIDIA NeMo SALM model (e.g., `nvidia/canary-qwen-2.5b`, English-only)
 - **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`)
+- **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
 ## Installation
@@ -44,6 +45,9 @@ pip install 'nemo_toolkit[asr,tts] @ git+https://github.com/NVIDIA/NeMo.git'
 # Install Voxtral dependencies (optional, for Voxtral)
 pip install -U transformers
 pip install --upgrade 'mistral-common[audio]'
+
+# Install Phi-4 dependencies (optional, for Phi-4 Multimodal)
+pip install transformers>=4.48.2 soundfile flash-attn
 
 # Install VibeVoice dependencies (optional, for VibeVoice-ASR)
 git clone https://github.com/microsoft/VibeVoice.git
@@ -105,6 +109,14 @@ python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-3B-2507
 
 Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Portuguese (pt), Italian (it), Dutch (nl), and Hindi (hi). Requires ~9.5 GB GPU RAM.
 
+### Evaluate with Phi-4 Multimodal
+
+```bash
+python scripts/evaluate_rvg1.py --model-card microsoft/Phi-4-multimodal-instruct
+```
+
+Note: Phi-4 Multimodal supports German, English, Chinese, French, Italian, Japanese, Spanish, and Portuguese. Recommended max 40 seconds per audio. Uses flash_attention_2 on Ampere+ GPUs.
+
 ### Evaluate with VibeVoice
 
 ```bash
@@ -136,6 +148,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
 - `results/nvidia_canary-qwen-2.5b_evaluation.json`
 - `results/mistralai_Voxtral-Mini-3B-2507_evaluation.json`
+- `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 
 Each result file contains:
@@ -186,6 +199,7 @@ omni-asr-test/
 │       ├── parakeet_evaluator.py
 │       ├── canary_evaluator.py
 │       ├── voxtral_evaluator.py
+│       ├── phi4_evaluator.py
 │       ├── vibevoice_evaluator.py
 │       └── metrics.py         # WER/CER computation
 ├── scripts/
