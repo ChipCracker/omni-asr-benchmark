@@ -152,7 +152,9 @@ class BaseEvaluator(ABC):
             try:
                 hypotheses = self.transcribe_batch(batch_paths)
             except Exception as e:
-                logger.error(f"Error transcribing batch: {e}")
+                import traceback
+                logger.error(f"Error transcribing batch: {type(e).__name__}: {e}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
                 hypotheses = [""] * len(batch_paths)
 
             for j, (hyp, sample) in enumerate(zip(hypotheses, batch_samples)):

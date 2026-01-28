@@ -110,7 +110,9 @@ class VoxtralEvaluator(BaseEvaluator):
                 results.append(transcript)
 
             except Exception as e:
+                import traceback
                 logger.warning(f"Error transcribing {audio_path}: {e}")
+                logger.warning(f"Traceback: {traceback.format_exc()}")
                 results.append("")
 
         return results
