@@ -86,7 +86,11 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     elif "vibevoice" in model_lower:
         from .vibevoice_evaluator import VibeVoiceEvaluator
         return VibeVoiceEvaluator(model_name, language, batch_size)
+    elif "canary-1b" in model_lower:
+        from .canary1b_evaluator import Canary1bEvaluator
+        return Canary1bEvaluator(model_name, language, batch_size)
     elif "canary" in model_lower:
+        # Canary-Qwen (existing)
         from .canary_evaluator import CanaryEvaluator
         return CanaryEvaluator(model_name, language, batch_size)
     elif "voxtral" in model_lower:
