@@ -218,6 +218,10 @@ This creates `results/comparison_chart.png` with:
 - Symlog scale to handle WER values >100%
 - Models sorted by ORT WER (ascending)
 
+### Current Results
+
+![Model Comparison Chart](results/comparison_chart.png)
+
 ## Project Structure
 
 ```
