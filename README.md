@@ -9,6 +9,8 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
 - **Canary-Qwen** - NVIDIA NeMo SALM model (e.g., `nvidia/canary-qwen-2.5b`, English-only)
+- **Canary-1b-v2** - NVIDIA NeMo ASR model (e.g., `nvidia/canary-1b-v2`, 25 European languages)
+- **Qwen3-ASR** - Alibaba's Qwen3-ASR models (e.g., `Qwen/Qwen3-ASR-1.7B`, `Qwen/Qwen3-ASR-0.6B`, 30+ languages)
 - **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`, `mistralai/Voxtral-Small-24B-2507`)
 - **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
@@ -41,6 +43,12 @@ pip install nemo-toolkit[asr]
 
 # Install NeMo trunk (optional, for Canary-Qwen - requires PyTorch 2.6+)
 pip install 'nemo_toolkit[asr,tts] @ git+https://github.com/NVIDIA/NeMo.git'
+
+# Install NeMo dependencies (optional, for Canary-1b-v2)
+pip install nemo-toolkit[asr]
+
+# Install Qwen3-ASR dependencies (optional, for Qwen3-ASR)
+pip install qwen-asr
 
 # Install Voxtral dependencies (optional, for Voxtral)
 pip install -U transformers
@@ -101,6 +109,26 @@ python scripts/evaluate_rvg1.py --model-card nvidia/canary-qwen-2.5b
 
 Note: Canary-Qwen is English-only (5.63% mean WER on HuggingFace OpenASR Leaderboard). German evaluation will show degraded results.
 
+### Evaluate with Canary-1b-v2
+
+```bash
+python scripts/evaluate_rvg1.py --model-card nvidia/canary-1b-v2
+```
+
+Note: Canary-1b-v2 supports 25 European languages including German (de), English (en), French (fr), Spanish (es), Italian (it), and more.
+
+### Evaluate with Qwen3-ASR
+
+```bash
+# Qwen3-ASR 1.7B
+python scripts/evaluate_rvg1.py --model-card Qwen/Qwen3-ASR-1.7B
+
+# Qwen3-ASR 0.6B (smaller, faster)
+python scripts/evaluate_rvg1.py --model-card Qwen/Qwen3-ASR-0.6B
+```
+
+Note: Qwen3-ASR supports 30+ languages with automatic language detection. Recommended for German transcription.
+
 ### Evaluate with Voxtral
 
 ```bash
@@ -151,6 +179,9 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
 - `results/nvidia_canary-qwen-2.5b_evaluation.json`
+- `results/nvidia_canary-1b-v2_evaluation.json`
+- `results/Qwen_Qwen3-ASR-1.7B_evaluation.json`
+- `results/Qwen_Qwen3-ASR-0.6B_evaluation.json`
 - `results/mistralai_Voxtral-Mini-3B-2507_evaluation.json`
 - `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
@@ -202,6 +233,8 @@ omni-asr-test/
 │       ├── crisperwhisper_evaluator.py
 │       ├── parakeet_evaluator.py
 │       ├── canary_evaluator.py
+│       ├── canary1b_evaluator.py
+│       ├── qwen3asr_evaluator.py
 │       ├── voxtral_evaluator.py
 │       ├── phi4_evaluator.py
 │       ├── vibevoice_evaluator.py
