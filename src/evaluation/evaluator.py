@@ -102,6 +102,9 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     elif "qwen3-asr" in model_lower:
         from .qwen3asr_evaluator import Qwen3ASREvaluator
         return Qwen3ASREvaluator(model_name, language, batch_size)
+    elif "omniasr" in model_lower or "omni-asr" in model_lower or "omni_asr" in model_lower:
+        # OmniASR models (CTC-1B, LLM-7B, etc.)
+        return OmniASREvaluator(model_name, language, batch_size)
     else:
         # Default to OmniASR evaluator
         return OmniASREvaluator(model_name, language, batch_size)

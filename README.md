@@ -8,7 +8,8 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 
 ## Supported Models
 
-- **OmniASR** (default) - Facebook's omnilingual ASR model
+- **OmniASR** (default) - Facebook's omnilingual ASR model (e.g., `omniASR_LLM_Unlimited_7B_v2`)
+- **OmniASR-CTC** - Facebook's CTC-based multilingual ASR (e.g., `omniASR_CTC_1B`, 1600+ languages, ~3 GB VRAM)
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
@@ -84,6 +85,14 @@ Set the `BAS_RVG1_DATA_DIR` environment variable to point to your BAS RVG1 datas
 ```bash
 python scripts/evaluate_rvg1.py
 ```
+
+### Evaluate with OmniASR-CTC-1B
+
+```bash
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B
+```
+
+Note: OmniASR-CTC-1B is a 1B parameter CTC-based model supporting 1600+ languages. Faster and smaller than the LLM variant (~3 GB VRAM).
 
 ### Evaluate with Whisper
 
@@ -166,6 +175,7 @@ Note: VibeVoice-ASR is a 9B parameter model requiring ~18-20 GB VRAM. It support
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
 
 - `results/omniASR_LLM_Unlimited_7B_v2_evaluation.json`
+- `results/omniASR_CTC_1B_evaluation.json`
 - `results/openai_whisper-large-v3_evaluation.json`
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
