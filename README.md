@@ -1,5 +1,9 @@
 # OmniASR Evaluation Framework
 
+![Model Comparison Chart](results/comparison_chart.png)
+
+![CER Comparison Chart](results/comparison_chart_cer.png)
+
 A framework for evaluating Automatic Speech Recognition (ASR) models on dialect speech datasets.
 
 ## Supported Models
@@ -157,19 +161,6 @@ python scripts/evaluate_rvg1.py --model-card microsoft/VibeVoice-ASR --batch-siz
 
 Note: VibeVoice-ASR is a 9B parameter model requiring ~18-20 GB VRAM. It supports up to 60 minutes of continuous audio and includes speaker diarization (stripped for WER evaluation).
 
-### Command Line Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--data-dir` | Path to BAS RVG1 data directory | `BAS_RVG1_DATA_DIR` env var |
-| `--model-card` | Model identifier | `omniASR_LLM_Unlimited_7B_v2` |
-| `--language` | Language code (e.g., `deu_Latn`) | `deu_Latn` |
-| `--batch-size` | Batch size for inference | `2` |
-| `--max-samples` | Max samples to evaluate | All |
-| `--channel` | Audio channel (`c`/`h`/`l`) | `c` |
-| `--output` | Output file path | `results/<model>_evaluation.json` |
-| `--verbose` | Enable verbose logging | `False` |
-
 ## Output
 
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
@@ -218,41 +209,3 @@ This creates `results/comparison_chart.png` with:
 - Symlog scale to handle WER values >100%
 - Models sorted by ORT WER (ascending)
 
-### Current Results
-
-![Model Comparison Chart](results/comparison_chart.png)
-
-## Project Structure
-
-```
-omni-asr-test/
-├── src/
-│   ├── datasets/
-│   │   ├── base.py           # Base dataset classes
-│   │   └── bas_rvg1.py       # BAS RVG1 dataset loader
-│   └── evaluation/
-│       ├── base_evaluator.py  # Abstract base evaluator
-│       ├── evaluator.py       # OmniASR evaluator + factory
-│       ├── whisper_evaluator.py
-│       ├── crisperwhisper_evaluator.py
-│       ├── parakeet_evaluator.py
-│       ├── canary_evaluator.py
-│       ├── canary1b_evaluator.py
-│       ├── qwen3asr_evaluator.py
-│       ├── voxtral_evaluator.py
-│       ├── phi4_evaluator.py
-│       ├── vibevoice_evaluator.py
-│       └── metrics.py         # WER/CER computation
-├── scripts/
-│   ├── evaluate_rvg1.py      # Main evaluation script
-│   ├── analyze_results.py    # Result analysis script
-│   └── plot_results.py       # Visualization script
-├── results/                   # Evaluation output
-└── requirements.txt
-```
-
-## Adding New Models
-
-1. Create a new evaluator class inheriting from `BaseEvaluator`
-2. Implement the `transcribe_batch()` method
-3. Register the model in `get_evaluator()` factory function in `evaluator.py`

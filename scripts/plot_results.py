@@ -22,7 +22,7 @@ def load_all_results(results_dir: Path) -> List[Dict[str, Any]]:
 
 
 def extract_metrics(data: Dict) -> Dict:
-    """Extract WER metrics and compute variance from per-sample data."""
+    """Extract WER and CER metrics and compute variance from per-sample data."""
     per_sample = data.get("per_sample", [])
 
     # Dialect WER
@@ -35,12 +35,26 @@ def extract_metrics(data: Dict) -> Dict:
     ort_mean = data["results"]["ort_reference"].get("wer")
     ort_std = np.std(ort_wers) if ort_wers else 0
 
+    # Dialect CER
+    dialect_cers = [s["dialect_cer"] for s in per_sample if s.get("dialect_cer") is not None]
+    dialect_cer_mean = data["results"]["dialect_reference"]["cer"]
+    dialect_cer_std = np.std(dialect_cers) if dialect_cers else 0
+
+    # ORT CER
+    ort_cers = [s["ort_cer"] for s in per_sample if s.get("ort_cer") is not None]
+    ort_cer_mean = data["results"]["ort_reference"].get("cer")
+    ort_cer_std = np.std(ort_cers) if ort_cers else 0
+
     return {
         "model": data.get("model", "Unknown"),
         "dialect_wer": dialect_mean,
         "dialect_std": dialect_std,
         "ort_wer": ort_mean,
         "ort_std": ort_std,
+        "dialect_cer": dialect_cer_mean,
+        "dialect_cer_std": dialect_cer_std,
+        "ort_cer": ort_cer_mean,
+        "ort_cer_std": ort_cer_std,
     }
 
 
@@ -97,6 +111,59 @@ def plot_results(metrics: List[Dict], output_path: Path = None):
         plt.show()
 
 
+def plot_cer_results(metrics: List[Dict], output_path: Path = None):
+    """Create grouped bar chart for CER with error bars and symlog scale."""
+    models = [m["model"].split("/")[-1] for m in metrics]  # Short names
+    dialect_cers = [m["dialect_cer"] * 100 for m in metrics]
+    dialect_stds = [m["dialect_cer_std"] * 100 for m in metrics]
+    ort_cers = [m["ort_cer"] * 100 if m["ort_cer"] else 0 for m in metrics]
+    ort_stds = [m["ort_cer_std"] * 100 for m in metrics]
+
+    x = np.arange(len(models))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Bars with error bars
+    bars1 = ax.bar(x - width/2, dialect_cers, width,
+                   yerr=dialect_stds, label="Dialect CER", capsize=5)
+    bars2 = ax.bar(x + width/2, ort_cers, width,
+                   yerr=ort_stds, label="ORT CER", capsize=5)
+
+    # Symlog scale: linear below 100%, logarithmic above
+    ax.set_yscale("symlog", linthresh=100, linscale=1)
+    ax.set_ylim(0, None)
+
+    # Y-axis ticks at every 10%
+    max_val = max(max(dialect_cers), max(ort_cers))
+    ticks = list(range(0, 101, 10))  # 0, 10, 20, ..., 100
+    if max_val > 100:
+        # Add ticks for logarithmic region
+        ticks.extend([200, 300, 500, 1000])
+        ticks = [t for t in ticks if t <= max_val * 1.5]
+    ax.set_yticks(ticks)
+    ax.set_yticklabels([f"{t}%" for t in ticks])
+
+    # Add value labels
+    ax.bar_label(bars1, fmt="%.1f%%", padding=3)
+    ax.bar_label(bars2, fmt="%.1f%%", padding=3)
+
+    ax.set_ylabel("Character Error Rate (%) - symlog scale")
+    ax.set_title("ASR Model Comparison - CER on BAS RVG1 Dataset (default configuration)")
+    ax.set_xticks(x)
+    ax.set_xticklabels(models, rotation=15, ha="right")
+    ax.legend()
+    ax.grid(axis="y", alpha=0.3)
+
+    plt.tight_layout()
+
+    if output_path:
+        plt.savefig(output_path, dpi=150)
+        print(f"Saved: {output_path}")
+    else:
+        plt.show()
+
+
 def main():
     results_dir = Path("results")
     all_data = load_all_results(results_dir)
@@ -106,6 +173,7 @@ def main():
     metrics.sort(key=lambda m: m["ort_wer"] or float("inf"))
 
     plot_results(metrics, Path("results/comparison_chart.png"))
+    plot_cer_results(metrics, Path("results/comparison_chart_cer.png"))
 
 
 if __name__ == "__main__":
