@@ -79,6 +79,12 @@ def parse_args() -> argparse.Namespace:
         help="Output file path for results (default: results/<model_name>_evaluation.json)",
     )
     parser.add_argument(
+        "--model-dir",
+        type=Path,
+        default=None,
+        help="Path to model directory (required for syllabic-asr models)",
+    )
+    parser.add_argument(
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose logging",
@@ -139,6 +145,7 @@ def main() -> int:
         model_name=args.model_card,
         language=args.language,
         batch_size=args.batch_size,
+        model_dir=str(args.model_dir) if args.model_dir else None,
     )
 
     # Run evaluation

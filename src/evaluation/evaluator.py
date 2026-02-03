@@ -59,7 +59,12 @@ class OmniASREvaluator(BaseEvaluator):
         return pipeline.transcribe(audio_paths, lang=lang, batch_size=self.batch_size)
 
 
-def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvaluator:
+def get_evaluator(
+    model_name: str,
+    language: str,
+    batch_size: int,
+    model_dir: str | None = None,
+) -> BaseEvaluator:
     """Factory function to create the appropriate evaluator based on model name.
 
     Args:
@@ -67,6 +72,7 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
                     "nvidia/parakeet-ctc-1.1b", or "omniASR_LLM_Unlimited_7B_v2").
         language: Language code for transcription (e.g., "deu_Latn").
         batch_size: Batch size for inference.
+        model_dir: Path to model directory (used by syllabic-asr evaluator).
 
     Returns:
         An appropriate evaluator instance for the specified model.
@@ -102,6 +108,13 @@ def get_evaluator(model_name: str, language: str, batch_size: int) -> BaseEvalua
     elif "qwen3-asr" in model_lower:
         from .qwen3asr_evaluator import Qwen3ASREvaluator
         return Qwen3ASREvaluator(model_name, language, batch_size)
+    elif "syllabic-asr" in model_lower or "syllabic_asr" in model_lower:
+        from .syllabic_asr_evaluator import SyllabicASREvaluator
+        decode_mode = "rnnt" if "rnnt" in model_lower else "ctc"
+        return SyllabicASREvaluator(
+            model_name, language, batch_size,
+            decode_mode=decode_mode, model_dir=model_dir,
+        )
     elif "omniasr" in model_lower or "omni-asr" in model_lower or "omni_asr" in model_lower:
         # OmniASR models (CTC-1B, LLM-7B, etc.)
         return OmniASREvaluator(model_name, language, batch_size)
