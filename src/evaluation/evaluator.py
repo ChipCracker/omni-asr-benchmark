@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import logging
+import os
+import tempfile
 from typing import List
+
+import torchaudio
 
 from .base_evaluator import BaseEvaluator, EvaluationResult, SampleResult
 
 logger = logging.getLogger(__name__)
+
+MAX_CTC_AUDIO_SEC = 35  # safety margin below pipeline's 40s hard cap
+CHUNK_DURATION_SEC = 30
 
 # Re-export for backward compatibility
 __all__ = ["OmniASREvaluator", "EvaluationResult", "SampleResult", "get_evaluator"]
@@ -48,6 +55,9 @@ class OmniASREvaluator(BaseEvaluator):
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe a batch of audio files.
 
+        For CTC models, long audio files (>35s) are split into ~30s chunks,
+        transcribed individually, and concatenated back together.
+
         Args:
             audio_paths: List of paths to audio files.
 
@@ -55,8 +65,52 @@ class OmniASREvaluator(BaseEvaluator):
             List of transcription strings.
         """
         pipeline = self._get_pipeline()
-        lang = [self.language] * len(audio_paths)
-        return pipeline.transcribe(audio_paths, lang=lang, batch_size=self.batch_size)
+        is_ctc = "ctc" in self.model_card.lower()
+
+        if not is_ctc:
+            lang = [self.language] * len(audio_paths)
+            return pipeline.transcribe(audio_paths, lang=lang, batch_size=self.batch_size)
+
+        # CTC model: split long files into chunks
+        all_paths = []       # flat list of paths to transcribe
+        file_map = []        # (original_index, num_chunks) to reassemble
+        temp_files = []
+
+        for idx, path in enumerate(audio_paths):
+            info = torchaudio.info(path)
+            duration = info.num_frames / info.sample_rate
+
+            if duration <= MAX_CTC_AUDIO_SEC:
+                all_paths.append(path)
+                file_map.append((idx, 1))
+            else:
+                waveform, sr = torchaudio.load(path)
+                chunk_samples = int(CHUNK_DURATION_SEC * sr)
+                chunks = waveform.split(chunk_samples, dim=1)
+                for chunk in chunks:
+                    tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+                    torchaudio.save(tmp.name, chunk, sr)
+                    temp_files.append(tmp.name)
+                    all_paths.append(tmp.name)
+                file_map.append((idx, len(chunks)))
+                logger.info(f"Split {path} ({duration:.1f}s) into {len(chunks)} chunks")
+
+        try:
+            lang = [self.language] * len(all_paths)
+            all_transcriptions = pipeline.transcribe(all_paths, lang=lang, batch_size=self.batch_size)
+        finally:
+            for tmp_path in temp_files:
+                os.unlink(tmp_path)
+
+        # Reassemble: concatenate chunk transcriptions per original file
+        results = []
+        pos = 0
+        for _, num_chunks in file_map:
+            chunk_texts = all_transcriptions[pos:pos + num_chunks]
+            results.append(" ".join(chunk_texts))
+            pos += num_chunks
+
+        return results
 
 
 def get_evaluator(
@@ -99,6 +153,9 @@ def get_evaluator(
         # Canary-Qwen (existing)
         from .canary_evaluator import CanaryEvaluator
         return CanaryEvaluator(model_name, language, batch_size)
+    elif "voxtral" in model_lower and "realtime" in model_lower:
+        from .voxtral_realtime_evaluator import VoxtralRealtimeEvaluator
+        return VoxtralRealtimeEvaluator(model_name, language, batch_size)
     elif "voxtral" in model_lower:
         from .voxtral_evaluator import VoxtralEvaluator
         return VoxtralEvaluator(model_name, language, batch_size)
