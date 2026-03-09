@@ -298,3 +298,8 @@ pyrightconfig.json
 
 # Evaluation results (JSON)
 results/*.json
+
+eval.err
+eval.out
+eval.slurm
+VibeVoice/**
