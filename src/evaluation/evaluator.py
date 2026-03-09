@@ -14,9 +14,12 @@ from .base_evaluator import BaseEvaluator, EvaluationResult, SampleResult
 
 logger = logging.getLogger(__name__)
 
-MAX_CTC_AUDIO_SEC = 35  # safety margin below pipeline's 40s hard cap
+MAX_AUDIO_SEC = 35  # safety margin below pipeline's 40s hard cap
 CHUNK_DURATION_SEC = 30
 MIN_CHUNK_DURATION_SEC = 2  # minimum chunk length to avoid 0-length feature sequences
+
+# Models with a 40s audio limit that need chunking
+MODELS_WITH_AUDIO_LIMIT = {"ctc", "llm_300m"}
 
 # Re-export for backward compatibility
 __all__ = ["OmniASREvaluator", "EvaluationResult", "SampleResult", "get_evaluator"]
@@ -57,8 +60,9 @@ class OmniASREvaluator(BaseEvaluator):
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe a batch of audio files.
 
-        For CTC models, long audio files (>35s) are split into ~30s chunks,
-        transcribed individually, and concatenated back together.
+        For models with a 40s audio limit (CTC models, LLM-300M), long audio
+        files (>35s) are split into ~30s chunks, transcribed individually,
+        and concatenated back together.
 
         Args:
             audio_paths: List of paths to audio files.
@@ -67,13 +71,14 @@ class OmniASREvaluator(BaseEvaluator):
             List of transcription strings.
         """
         pipeline = self._get_pipeline()
-        is_ctc = "ctc" in self.model_card.lower()
+        model_lower = self.model_card.lower()
+        needs_chunking = any(tag in model_lower for tag in MODELS_WITH_AUDIO_LIMIT)
 
-        if not is_ctc:
+        if not needs_chunking:
             lang = [self.language] * len(audio_paths)
             return pipeline.transcribe(audio_paths, lang=lang, batch_size=self.batch_size)
 
-        # CTC model: split long files into chunks
+        # Split long files into chunks (40s hard cap)
         all_paths = []       # flat list of paths to transcribe
         file_map = []        # (original_index, num_chunks) to reassemble
         temp_files = []
@@ -82,7 +87,7 @@ class OmniASREvaluator(BaseEvaluator):
             info = torchaudio.info(path)
             duration = info.num_frames / info.sample_rate
 
-            if duration <= MAX_CTC_AUDIO_SEC:
+            if duration <= MAX_AUDIO_SEC:
                 all_paths.append(path)
                 file_map.append((idx, 1))
             else:
