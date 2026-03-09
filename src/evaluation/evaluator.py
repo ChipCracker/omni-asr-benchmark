@@ -184,6 +184,9 @@ def get_evaluator(
             model_name, language, batch_size,
             decode_mode=decode_mode, model_dir=model_dir,
         )
+    elif "granite" in model_lower:
+        from .granite_evaluator import GraniteEvaluator
+        return GraniteEvaluator(model_name, language, batch_size)
     elif "omniasr" in model_lower or "omni-asr" in model_lower or "omni_asr" in model_lower:
         # OmniASR models (CTC-1B, LLM-7B, etc.)
         return OmniASREvaluator(model_name, language, batch_size)

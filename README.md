@@ -20,6 +20,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **Voxtral Realtime** - Mistral AI's real-time streaming ASR (e.g., `mistralai/Voxtral-Mini-4B-Realtime-2602`, 4B params, 13 languages)
 - **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
+- **Granite Speech** - IBM Granite 4.0 1B Speech model (e.g., `ibm-granite/granite-4.0-1b-speech`, 6 languages)
 
 ## Installation
 
@@ -197,6 +198,14 @@ python scripts/evaluate_rvg1.py --model-card microsoft/VibeVoice-ASR --batch-siz
 
 Note: VibeVoice-ASR is a 9B parameter model requiring ~18-20 GB VRAM. It supports up to 60 minutes of continuous audio and includes speaker diarization (stripped for WER evaluation).
 
+### Evaluate with Granite Speech
+
+```bash
+python scripts/evaluate_rvg1.py --model-card ibm-granite/granite-4.0-1b-speech --batch-size 1
+```
+
+Note: Granite 4.0 1B Speech supports English, German, French, Spanish, Portuguese, and Japanese. Uses a Conformer speech encoder with Granite-4.0-1b-base.
+
 ## Output
 
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
@@ -218,6 +227,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/mistralai_Voxtral-Mini-4B-Realtime-2602_evaluation.json`
 - `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
+- `results/ibm-granite_granite-4.0-1b-speech_evaluation.json`
 
 Each result file contains:
 - Model and dataset metadata
