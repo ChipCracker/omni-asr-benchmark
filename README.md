@@ -9,7 +9,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 ## Supported Models
 
 - **OmniASR** (default) - Facebook's omnilingual ASR model (e.g., `omniASR_LLM_Unlimited_7B_v2`)
-- **OmniASR-CTC** - Facebook's CTC-based multilingual ASR (e.g., `omniASR_CTC_1B`, 1600+ languages, ~3 GB VRAM)
+- **OmniASR-CTC** - Facebook's CTC-based multilingual ASR (e.g., `omniASR_CTC_1B`, `omniASR_CTC_1B_v2`, `omniASR_CTC_300M_v2`, 1600+ languages, ~3 GB VRAM)
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
@@ -17,6 +17,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **Canary-1b-v2** - NVIDIA NeMo ASR model (e.g., `nvidia/canary-1b-v2`, 25 European languages)
 - **Qwen3-ASR** - Alibaba's Qwen3-ASR models (e.g., `Qwen/Qwen3-ASR-1.7B`, `Qwen/Qwen3-ASR-0.6B`, 30+ languages)
 - **Voxtral** - Mistral AI's Voxtral models (e.g., `mistralai/Voxtral-Mini-3B-2507`, `mistralai/Voxtral-Small-24B-2507`)
+- **Voxtral Realtime** - Mistral AI's real-time streaming ASR (e.g., `mistralai/Voxtral-Mini-4B-Realtime-2602`, 4B params, 13 languages)
 - **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 
@@ -59,6 +60,10 @@ pip install qwen-asr
 pip install -U transformers
 pip install --upgrade 'mistral-common[audio]'
 
+# Install Voxtral Realtime dependencies (optional, for Voxtral Realtime)
+pip install git+https://github.com/huggingface/transformers.git@refs/pull/43769/head
+pip install librosa soundfile
+
 # Install Phi-4 dependencies (optional, for Phi-4 Multimodal)
 pip install transformers>=4.48.2 soundfile flash-attn
 
@@ -93,6 +98,18 @@ python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B
 ```
 
 Note: OmniASR-CTC-1B is a 1B parameter CTC-based model supporting 1600+ languages. Faster and smaller than the LLM variant (~3 GB VRAM).
+
+### Evaluate with OmniASR-CTC v2
+
+```bash
+# OmniASR-CTC 1B v2 - improved accuracy over v1
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B_v2
+
+# OmniASR-CTC 300M v2 - smallest and fastest variant
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_300M_v2
+```
+
+Note: The v2 CTC models (December 2025 update) offer improved accuracy over the original CTC variants.
 
 ### Evaluate with Whisper
 
@@ -154,6 +171,14 @@ python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Small-24B-2507
 
 Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Portuguese (pt), Italian (it), Dutch (nl), and Hindi (hi).
 
+### Evaluate with Voxtral Realtime
+
+```bash
+python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602 --batch-size 1
+```
+
+Note: Voxtral Realtime is a 4B parameter real-time streaming ASR model supporting 13 languages. Requires transformers installed from PR branch (see installation).
+
 ### Evaluate with Phi-4 Multimodal
 
 ```bash
@@ -176,6 +201,8 @@ Results are saved as JSON files in the `results/` directory with the model name 
 
 - `results/omniASR_LLM_Unlimited_7B_v2_evaluation.json`
 - `results/omniASR_CTC_1B_evaluation.json`
+- `results/omniASR_CTC_1B_v2_evaluation.json`
+- `results/omniASR_CTC_300M_v2_evaluation.json`
 - `results/openai_whisper-large-v3_evaluation.json`
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
@@ -184,6 +211,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/Qwen_Qwen3-ASR-1.7B_evaluation.json`
 - `results/Qwen_Qwen3-ASR-0.6B_evaluation.json`
 - `results/mistralai_Voxtral-Mini-3B-2507_evaluation.json`
+- `results/mistralai_Voxtral-Mini-4B-Realtime-2602_evaluation.json`
 - `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 
