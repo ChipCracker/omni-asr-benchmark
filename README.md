@@ -8,8 +8,8 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 
 ## Supported Models
 
-- **OmniASR** (default) - Facebook's omnilingual ASR model (e.g., `omniASR_LLM_Unlimited_7B_v2`)
-- **OmniASR-CTC** - Facebook's CTC-based multilingual ASR (e.g., `omniASR_CTC_1B`, `omniASR_CTC_1B_v2`, `omniASR_CTC_300M_v2`, 1600+ languages, ~3 GB VRAM)
+- **OmniASR-LLM** (default) - Facebook's omnilingual LLM-based ASR (e.g., `omniASR_LLM_Unlimited_7B_v2`, `omniASR_LLM_300M`)
+- **OmniASR-CTC** - Facebook's CTC-based multilingual ASR (e.g., `omniASR_CTC_300M_v2`, `omniASR_CTC_1B_v2`, `omniASR_CTC_3B_v2`, `omniASR_CTC_7B_v2`, 1600+ languages)
 - **Whisper** - OpenAI's Whisper models via HuggingFace (e.g., `openai/whisper-large-v3`)
 - **CrisperWhisper** - nyrahealth's fine-tuned Whisper with verbatim transcription (e.g., `nyrahealth/CrisperWhisper`)
 - **Parakeet** - NVIDIA NeMo Parakeet models (e.g., `nvidia/parakeet-ctc-1.1b`)
@@ -85,31 +85,33 @@ Set the `BAS_RVG1_DATA_DIR` environment variable to point to your BAS RVG1 datas
 
 ## Usage
 
-### Evaluate with OmniASR (default)
+### Evaluate with OmniASR-LLM (default)
 
 ```bash
+# OmniASR-LLM 7B v2 (default)
 python scripts/evaluate_rvg1.py
+
+# OmniASR-LLM 300M - smallest LLM variant
+python scripts/evaluate_rvg1.py --model-card omniASR_LLM_300M
 ```
 
-### Evaluate with OmniASR-CTC-1B
+### Evaluate with OmniASR-CTC
 
 ```bash
-python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B
-```
-
-Note: OmniASR-CTC-1B is a 1B parameter CTC-based model supporting 1600+ languages. Faster and smaller than the LLM variant (~3 GB VRAM).
-
-### Evaluate with OmniASR-CTC v2
-
-```bash
-# OmniASR-CTC 1B v2 - improved accuracy over v1
-python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B_v2
-
 # OmniASR-CTC 300M v2 - smallest and fastest variant
 python scripts/evaluate_rvg1.py --model-card omniASR_CTC_300M_v2
+
+# OmniASR-CTC 1B v2
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_1B_v2
+
+# OmniASR-CTC 3B v2
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_3B_v2
+
+# OmniASR-CTC 7B v2 - largest CTC variant
+python scripts/evaluate_rvg1.py --model-card omniASR_CTC_7B_v2
 ```
 
-Note: The v2 CTC models (December 2025 update) offer improved accuracy over the original CTC variants.
+Note: CTC models have a 40s audio limit; files longer than 35s are automatically split into ~30s chunks. The v2 models (December 2025 update) offer improved accuracy over v1.
 
 ### Evaluate with Whisper
 
@@ -200,9 +202,11 @@ Note: VibeVoice-ASR is a 9B parameter model requiring ~18-20 GB VRAM. It support
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
 
 - `results/omniASR_LLM_Unlimited_7B_v2_evaluation.json`
-- `results/omniASR_CTC_1B_evaluation.json`
-- `results/omniASR_CTC_1B_v2_evaluation.json`
+- `results/omniASR_LLM_300M_evaluation.json`
 - `results/omniASR_CTC_300M_v2_evaluation.json`
+- `results/omniASR_CTC_1B_v2_evaluation.json`
+- `results/omniASR_CTC_3B_v2_evaluation.json`
+- `results/omniASR_CTC_7B_v2_evaluation.json`
 - `results/openai_whisper-large-v3_evaluation.json`
 - `results/nyrahealth_CrisperWhisper_evaluation.json`
 - `results/nvidia_parakeet-ctc-1.1b_evaluation.json`
