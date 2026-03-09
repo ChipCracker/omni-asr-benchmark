@@ -105,9 +105,9 @@ class GraniteEvaluator(BaseEvaluator):
 
                 # Process inputs
                 model_inputs = self._processor(
-                    text=text,
-                    audios=waveform.squeeze(0).numpy(),
-                    sampling_rate=sr,
+                    text,
+                    waveform.squeeze(0),
+                    device=self._device,
                     return_tensors="pt",
                 ).to(self._device)
 
