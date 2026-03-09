@@ -7,6 +7,7 @@ import os
 import tempfile
 from typing import List
 
+import torch
 import torchaudio
 
 from .base_evaluator import BaseEvaluator, EvaluationResult, SampleResult
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 MAX_CTC_AUDIO_SEC = 35  # safety margin below pipeline's 40s hard cap
 CHUNK_DURATION_SEC = 30
+MIN_CHUNK_DURATION_SEC = 2  # minimum chunk length to avoid 0-length feature sequences
 
 # Re-export for backward compatibility
 __all__ = ["OmniASREvaluator", "EvaluationResult", "SampleResult", "get_evaluator"]
@@ -86,7 +88,12 @@ class OmniASREvaluator(BaseEvaluator):
             else:
                 waveform, sr = torchaudio.load(path)
                 chunk_samples = int(CHUNK_DURATION_SEC * sr)
-                chunks = waveform.split(chunk_samples, dim=1)
+                min_samples = int(MIN_CHUNK_DURATION_SEC * sr)
+                chunks = list(waveform.split(chunk_samples, dim=1))
+                # Merge tiny last chunk into previous to avoid 0-length features
+                if len(chunks) > 1 and chunks[-1].shape[1] < min_samples:
+                    chunks[-2] = torch.cat([chunks[-2], chunks[-1]], dim=1)
+                    chunks.pop()
                 for chunk in chunks:
                     tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
                     torchaudio.save(tmp.name, chunk, sr)
