@@ -27,7 +27,6 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
         super().__init__(model_name, language, batch_size)
         self._model = None
         self._processor = None
-        self._audio_cls = None
 
     def _load_model(self):
         """Lazy-load the Voxtral Realtime model and processor."""
@@ -35,11 +34,9 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
             logger.info(f"Loading Voxtral Realtime model: {self.model_name}")
             try:
                 import torch
-                from mistral_common.tokens.tokenizers.audio import Audio
                 from transformers import AutoProcessor, VoxtralRealtimeForConditionalGeneration
 
                 self._processor = AutoProcessor.from_pretrained(self.model_name)
-                self._audio_cls = Audio
 
                 has_cuda = torch.cuda.is_available()
                 self._model = VoxtralRealtimeForConditionalGeneration.from_pretrained(
@@ -56,24 +53,27 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
 
             except ImportError as e:
                 raise ImportError(
-                    "Voxtral Realtime support requires transformers>=5.2.0 and "
-                    "mistral-common with audio extras. Install with: "
-                    "pip install --upgrade transformers 'mistral-common[audio]'. "
+                    "Voxtral Realtime support requires transformers>=5.2.0. "
+                    "Install with: pip install --upgrade 'transformers>=5.2.0'. "
                     f"Original error: {e}"
                 ) from e
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
         """Transcribe audio files using Voxtral Realtime."""
+        import soundfile as sf
+
         self._load_model()
 
         results = []
         for audio_path in audio_paths:
             try:
-                audio = self._audio_cls.from_file(audio_path, strict=False)
-                audio.resample(self._processor.feature_extractor.sampling_rate)
+                audio, sample_rate = sf.read(audio_path, dtype="float32")
+                if getattr(audio, "ndim", 1) > 1:
+                    audio = audio.mean(axis=1)
 
                 inputs = self._processor(
-                    audio.audio_array,
+                    audio,
+                    sampling_rate=sample_rate,
                     return_tensors="pt",
                 )
                 inputs = inputs.to(self._device, dtype=self._model.dtype)

@@ -26,8 +26,8 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd omni-asr-test
+git clone https://github.com/ChipCracker/omni-asr-benchmark.git
+cd omni-asr-benchmark
 
 # Create virtual environment
 python -m venv .venv
@@ -59,7 +59,6 @@ pip install qwen-asr
 
 # Install Voxtral / Voxtral Realtime dependencies (optional)
 pip install --upgrade "transformers>=5.2.0"
-pip install --upgrade "mistral-common[audio]"
 
 # Install Phi-4 dependencies (optional, for Phi-4 Multimodal)
 pip install transformers>=4.48.2 soundfile flash-attn
@@ -69,6 +68,8 @@ git clone https://github.com/microsoft/VibeVoice.git
 cd VibeVoice
 pip install -e .[asr]
 ```
+
+Note: The repository was renamed from `omni-asr-test` to `omni-asr-benchmark`.
 
 ## Configuration
 
@@ -176,7 +177,7 @@ Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Por
 python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602 --batch-size 1
 ```
 
-Note: Voxtral Realtime is a 4B parameter real-time ASR model supporting 13 languages. Native Transformers support starts with `transformers>=5.2.0`; the benchmark uses the file-based Transformers path, while upstream recommends vLLM for production streaming deployments. Expect roughly 16 GB VRAM for BF16 inference.
+Note: Voxtral Realtime is a 4B parameter real-time ASR model supporting 13 languages. Native Transformers support starts with `transformers>=5.2.0`; this benchmark uses the documented offline `AutoProcessor` path with `soundfile`, while upstream recommends vLLM for production streaming deployments. Expect roughly 16 GB VRAM for BF16 inference.
 
 ### Evaluate with Phi-4 Multimodal
 

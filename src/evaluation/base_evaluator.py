@@ -155,6 +155,8 @@ class BaseEvaluator(ABC):
                 import traceback
                 logger.error(f"Error transcribing batch: {type(e).__name__}: {e}")
                 logger.error(f"Traceback: {traceback.format_exc()}")
+                if isinstance(e, ImportError):
+                    raise
                 hypotheses = [""] * len(batch_paths)
 
             for j, (hyp, sample) in enumerate(zip(hypotheses, batch_samples)):
