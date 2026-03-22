@@ -57,13 +57,9 @@ pip install nemo-toolkit[asr]
 # Install Qwen3-ASR dependencies (optional, for Qwen3-ASR)
 pip install qwen-asr
 
-# Install Voxtral dependencies (optional, for Voxtral)
-pip install -U transformers
-pip install --upgrade 'mistral-common[audio]'
-
-# Install Voxtral Realtime dependencies (optional, for Voxtral Realtime)
-pip install git+https://github.com/huggingface/transformers.git@refs/pull/43769/head
-pip install librosa soundfile
+# Install Voxtral / Voxtral Realtime dependencies (optional)
+pip install --upgrade "transformers>=5.2.0"
+pip install --upgrade "mistral-common[audio]"
 
 # Install Phi-4 dependencies (optional, for Phi-4 Multimodal)
 pip install transformers>=4.48.2 soundfile flash-attn
@@ -180,7 +176,7 @@ Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Por
 python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602 --batch-size 1
 ```
 
-Note: Voxtral Realtime is a 4B parameter real-time streaming ASR model supporting 13 languages. Requires transformers installed from PR branch (see installation).
+Note: Voxtral Realtime is a 4B parameter real-time ASR model supporting 13 languages. Native Transformers support starts with `transformers>=5.2.0`; the benchmark uses the file-based Transformers path, while upstream recommends vLLM for production streaming deployments. Expect roughly 16 GB VRAM for BF16 inference.
 
 ### Evaluate with Phi-4 Multimodal
 
@@ -260,4 +256,3 @@ This creates `results/comparison_chart.png` with:
 - Error bars showing standard deviation across samples
 - Symlog scale to handle WER values >100%
 - Models sorted by ORT WER (ascending)
-
