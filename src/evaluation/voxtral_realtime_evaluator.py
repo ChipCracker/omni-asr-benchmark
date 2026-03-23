@@ -178,22 +178,28 @@ class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
                     f"Original error: {e}"
                 ) from e
 
+    def _proc_attr(self, name):
+        """Resolve processor attribute, calling it if it's a method."""
+        val = getattr(self._processor, name)
+        return val() if callable(val) else val
+
     def _make_chunk_generator(self, audio: np.ndarray, first_inputs):
         """Create a generator that yields input_features for each audio chunk."""
-        proc = self._processor
-        hop_length = proc.feature_extractor.hop_length
-        win_length = proc.feature_extractor.win_length
+        hop_length = self._processor.feature_extractor.hop_length
+        win_length = self._processor.feature_extractor.win_length
 
         # First chunk features
         yield first_inputs.input_features
 
         # Subsequent chunks
-        mel_frame_idx = proc.num_mel_frames_first_audio_chunk
+        mel_frame_idx = self._proc_attr("num_mel_frames_first_audio_chunk")
+        samples_per_chunk = self._proc_attr("num_samples_per_audio_chunk")
+        audio_len_per_tok = self._proc_attr("audio_length_per_tok")
         start_idx = mel_frame_idx * hop_length - win_length // 2
 
-        while start_idx + proc.num_samples_per_audio_chunk < audio.shape[0]:
-            end_idx = start_idx + proc.num_samples_per_audio_chunk
-            chunk_inputs = proc(
+        while start_idx + samples_per_chunk < audio.shape[0]:
+            end_idx = start_idx + samples_per_chunk
+            chunk_inputs = self._processor(
                 audio[start_idx:end_idx],
                 is_streaming=True,
                 is_first_audio_chunk=False,
@@ -202,7 +208,7 @@ class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
             chunk_inputs = chunk_inputs.to(self._device, dtype=self._model.dtype)
             yield chunk_inputs.input_features
 
-            mel_frame_idx += proc.audio_length_per_tok
+            mel_frame_idx += audio_len_per_tok
             start_idx = mel_frame_idx * hop_length - win_length // 2
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
@@ -210,7 +216,6 @@ class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
         import soundfile as sf
 
         self._load_model()
-        proc = self._processor
 
         results = []
         for audio_path in audio_paths:
@@ -220,14 +225,13 @@ class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
                     audio = audio.mean(axis=1)
 
                 # Pad audio for right padding tokens required by the model
-                audio = np.pad(
-                    audio,
-                    (0, proc.num_right_pad_tokens * proc.raw_audio_length_per_tok),
-                )
+                right_pad = self._proc_attr("num_right_pad_tokens") * self._proc_attr("raw_audio_length_per_tok")
+                audio = np.pad(audio, (0, right_pad))
 
                 # Process first chunk
-                first_chunk = audio[: proc.num_samples_first_audio_chunk]
-                first_inputs = proc(
+                first_chunk_size = self._proc_attr("num_samples_first_audio_chunk")
+                first_chunk = audio[:first_chunk_size]
+                first_inputs = self._processor(
                     first_chunk,
                     is_streaming=True,
                     is_first_audio_chunk=True,
@@ -242,7 +246,7 @@ class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
                     num_delay_tokens=first_inputs.num_delay_tokens,
                 )
 
-                decoded = proc.batch_decode(outputs, skip_special_tokens=True)
+                decoded = self._processor.batch_decode(outputs, skip_special_tokens=True)
                 results.append(decoded[0].strip() if decoded else "")
 
             except Exception as e:
