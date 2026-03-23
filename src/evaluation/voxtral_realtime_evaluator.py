@@ -59,44 +59,59 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
                 ) from e
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
-        """Transcribe audio files using Voxtral Realtime."""
+        """Transcribe audio files using Voxtral Realtime with true batching."""
         import soundfile as sf
 
         self._load_model()
 
-        results = []
+        # Load all audio files in the batch
+        audios = []
         for audio_path in audio_paths:
-            try:
-                audio, sample_rate = sf.read(audio_path, dtype="float32")
-                if getattr(audio, "ndim", 1) > 1:
-                    audio = audio.mean(axis=1)
+            audio, _ = sf.read(audio_path, dtype="float32")
+            if getattr(audio, "ndim", 1) > 1:
+                audio = audio.mean(axis=1)
+            audios.append(audio)
 
-                inputs = self._processor(
-                    audio,
-                    sampling_rate=sample_rate,
-                    return_tensors="pt",
-                )
-                inputs = inputs.to(self._device, dtype=self._model.dtype)
+        try:
+            # True batching: single processor + generate call for entire batch
+            inputs = self._processor(audios, return_tensors="pt")
+            inputs = inputs.to(self._device, dtype=self._model.dtype)
 
-                outputs = self._model.generate(
-                    **inputs,
-                    do_sample=False,
-                    temperature=0.0,
-                    max_new_tokens=500,
-                )
+            outputs = self._model.generate(
+                **inputs,
+                do_sample=False,
+                temperature=0.0,
+                max_new_tokens=500,
+            )
 
-                decoded = self._processor.batch_decode(
-                    outputs, skip_special_tokens=True
-                )
+            decoded = self._processor.batch_decode(
+                outputs, skip_special_tokens=True
+            )
+            return [t.strip() for t in decoded]
 
-                transcript = decoded[0].strip() if decoded else ""
-                results.append(transcript)
+        except Exception as e:
+            logger.warning(
+                f"Batch transcription failed, falling back to per-file: {e}"
+            )
+            # Fallback: process each file individually
+            results = []
+            for audio_path, audio in zip(audio_paths, audios):
+                try:
+                    inputs = self._processor(audio, return_tensors="pt")
+                    inputs = inputs.to(self._device, dtype=self._model.dtype)
 
-            except Exception as e:
-                import traceback
+                    outputs = self._model.generate(
+                        **inputs,
+                        do_sample=False,
+                        temperature=0.0,
+                        max_new_tokens=500,
+                    )
 
-                logger.warning(f"Error transcribing {audio_path}: {e}")
-                logger.warning(f"Traceback: {traceback.format_exc()}")
-                results.append("")
-
-        return results
+                    decoded = self._processor.batch_decode(
+                        outputs, skip_special_tokens=True
+                    )
+                    results.append(decoded[0].strip() if decoded else "")
+                except Exception as inner_e:
+                    logger.warning(f"Error transcribing {audio_path}: {inner_e}")
+                    results.append("")
+            return results
