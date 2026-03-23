@@ -1,9 +1,16 @@
-"""Voxtral Realtime evaluator using HuggingFace Transformers."""
+"""Voxtral Realtime evaluators using HuggingFace Transformers.
+
+Provides two evaluator classes:
+- VoxtralRealtimeEvaluator: Offline mode (full audio at once, supports batching)
+- VoxtralRealtimeOnlineEvaluator: Online/streaming mode (chunked audio via generator)
+"""
 
 from __future__ import annotations
 
 import logging
 from typing import List
+
+import numpy as np
 
 from .base_evaluator import BaseEvaluator
 
@@ -115,3 +122,131 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
                     logger.warning(f"Error transcribing {audio_path}: {inner_e}")
                     results.append("")
             return results
+
+
+class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
+    """Evaluator for Voxtral Realtime in online/streaming mode.
+
+    Simulates real-time streaming by splitting audio into chunks and feeding
+    them via a generator to model.generate(). This evaluates the model's
+    streaming transcription quality (which may differ from offline mode).
+    """
+
+    # Suffix appended to model name for CLI selection
+    _MODEL_SUFFIX = "-online"
+
+    def __init__(
+        self,
+        model_name: str = "mistralai/Voxtral-Mini-4B-Realtime-2602-online",
+        language: str = "deu_Latn",
+        batch_size: int = 1,
+    ) -> None:
+        # Strip the -online suffix to get the actual HF model name
+        hf_model_name = model_name.removesuffix(self._MODEL_SUFFIX)
+        # Streaming mode is per-audio, no batching possible
+        super().__init__(hf_model_name, language, batch_size=1)
+        self._model = None
+        self._processor = None
+
+    def _load_model(self):
+        """Lazy-load the Voxtral Realtime model and processor."""
+        if self._model is None:
+            logger.info(f"Loading Voxtral Realtime model (online mode): {self.model_name}")
+            try:
+                import torch
+                from transformers import AutoProcessor, VoxtralRealtimeForConditionalGeneration
+
+                self._processor = AutoProcessor.from_pretrained(self.model_name)
+
+                has_cuda = torch.cuda.is_available()
+                self._model = VoxtralRealtimeForConditionalGeneration.from_pretrained(
+                    self.model_name,
+                    torch_dtype=torch.bfloat16 if has_cuda else torch.float32,
+                    device_map="auto" if has_cuda else None,
+                )
+                if not has_cuda:
+                    self._model = self._model.to("cpu")
+
+                self._model.eval()
+                self._device = self._model.device
+                logger.info(f"Voxtral Realtime model loaded on {self._device} (online mode)")
+
+            except ImportError as e:
+                raise ImportError(
+                    "Voxtral Realtime support requires transformers>=5.2.0. "
+                    "Install with: pip install --upgrade 'transformers>=5.2.0'. "
+                    f"Original error: {e}"
+                ) from e
+
+    def _make_chunk_generator(self, audio: np.ndarray, first_inputs):
+        """Create a generator that yields input_features for each audio chunk."""
+        proc = self._processor
+        hop_length = proc.feature_extractor.hop_length
+        win_length = proc.feature_extractor.win_length
+
+        # First chunk features
+        yield first_inputs.input_features
+
+        # Subsequent chunks
+        mel_frame_idx = proc.num_mel_frames_first_audio_chunk
+        start_idx = mel_frame_idx * hop_length - win_length // 2
+
+        while start_idx + proc.num_samples_per_audio_chunk < audio.shape[0]:
+            end_idx = start_idx + proc.num_samples_per_audio_chunk
+            chunk_inputs = proc(
+                audio[start_idx:end_idx],
+                is_streaming=True,
+                is_first_audio_chunk=False,
+                return_tensors="pt",
+            )
+            chunk_inputs = chunk_inputs.to(self._device, dtype=self._model.dtype)
+            yield chunk_inputs.input_features
+
+            mel_frame_idx += proc.audio_length_per_tok
+            start_idx = mel_frame_idx * hop_length - win_length // 2
+
+    def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
+        """Transcribe audio files using Voxtral Realtime in online/streaming mode."""
+        import soundfile as sf
+
+        self._load_model()
+        proc = self._processor
+
+        results = []
+        for audio_path in audio_paths:
+            try:
+                audio, _ = sf.read(audio_path, dtype="float32")
+                if getattr(audio, "ndim", 1) > 1:
+                    audio = audio.mean(axis=1)
+
+                # Pad audio for right padding tokens required by the model
+                audio = np.pad(
+                    audio,
+                    (0, proc.num_right_pad_tokens * proc.raw_audio_length_per_tok),
+                )
+
+                # Process first chunk
+                first_chunk = audio[: proc.num_samples_first_audio_chunk]
+                first_inputs = proc(
+                    first_chunk,
+                    is_streaming=True,
+                    is_first_audio_chunk=True,
+                    return_tensors="pt",
+                )
+                first_inputs = first_inputs.to(self._device, dtype=self._model.dtype)
+
+                # Generate with chunk generator
+                outputs = self._model.generate(
+                    input_ids=first_inputs.input_ids,
+                    input_features=self._make_chunk_generator(audio, first_inputs),
+                    num_delay_tokens=first_inputs.num_delay_tokens,
+                )
+
+                decoded = proc.batch_decode(outputs, skip_special_tokens=True)
+                results.append(decoded[0].strip() if decoded else "")
+
+            except Exception as e:
+                logger.warning(f"Error transcribing {audio_path} (online mode): {e}")
+                results.append("")
+
+        return results

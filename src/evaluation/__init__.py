@@ -5,7 +5,7 @@ from .evaluator import OmniASREvaluator, get_evaluator
 from .metrics import compute_asr_metrics
 from .syllabic_asr_evaluator import SyllabicASREvaluator
 from .vibevoice_evaluator import VibeVoiceEvaluator
-from .voxtral_realtime_evaluator import VoxtralRealtimeEvaluator
+from .voxtral_realtime_evaluator import VoxtralRealtimeEvaluator, VoxtralRealtimeOnlineEvaluator
 
 __all__ = [
     "BaseEvaluator",
@@ -17,4 +17,5 @@ __all__ = [
     "SyllabicASREvaluator",
     "VibeVoiceEvaluator",
     "VoxtralRealtimeEvaluator",
+    "VoxtralRealtimeOnlineEvaluator",
 ]

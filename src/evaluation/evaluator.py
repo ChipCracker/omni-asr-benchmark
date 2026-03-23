@@ -165,6 +165,9 @@ def get_evaluator(
         # Canary-Qwen (existing)
         from .canary_evaluator import CanaryEvaluator
         return CanaryEvaluator(model_name, language, batch_size)
+    elif "voxtral" in model_lower and "realtime" in model_lower and "online" in model_lower:
+        from .voxtral_realtime_evaluator import VoxtralRealtimeOnlineEvaluator
+        return VoxtralRealtimeOnlineEvaluator(model_name, language, batch_size)
     elif "voxtral" in model_lower and "realtime" in model_lower:
         from .voxtral_realtime_evaluator import VoxtralRealtimeEvaluator
         return VoxtralRealtimeEvaluator(model_name, language, batch_size)
