@@ -173,11 +173,19 @@ Note: Voxtral supports German (de), English (en), French (fr), Spanish (es), Por
 
 ### Evaluate with Voxtral Realtime
 
+**Offline mode** (full audio at once, supports batching):
+
 ```bash
-python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602 --batch-size 1
+python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602 --batch-size 4
 ```
 
-Note: Voxtral Realtime is a 4B parameter real-time ASR model supporting 13 languages. Native Transformers support starts with `transformers>=5.2.0`; this benchmark uses the documented offline `AutoProcessor` path with `soundfile`, while upstream recommends vLLM for production streaming deployments. Expect roughly 16 GB VRAM for BF16 inference.
+**Online mode** (simulated streaming, chunked audio via generator):
+
+```bash
+python scripts/evaluate_rvg1.py --model-card mistralai/Voxtral-Mini-4B-Realtime-2602-online --batch-size 1
+```
+
+Note: Voxtral Realtime is a 4B parameter real-time ASR model supporting 13 languages. Native Transformers support starts with `transformers>=5.2.0`. The offline mode processes full audio files and supports batch sizes > 1. The online mode simulates real-time streaming by splitting audio into ~105 ms chunks (with a ~560 ms first chunk) and feeding them incrementally to the model; batch size is fixed to 1. Append `-online` to the model card name to select online mode. Expect roughly 16 GB VRAM for BF16 inference.
 
 ### Evaluate with Phi-4 Multimodal
 
@@ -221,7 +229,8 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/Qwen_Qwen3-ASR-1.7B_evaluation.json`
 - `results/Qwen_Qwen3-ASR-0.6B_evaluation.json`
 - `results/mistralai_Voxtral-Mini-3B-2507_evaluation.json`
-- `results/mistralai_Voxtral-Mini-4B-Realtime-2602_evaluation.json`
+- `results/mistralai_Voxtral-Mini-4B-Realtime-2602_evaluation.json` (offline)
+- `results/mistralai_Voxtral-Mini-4B-Realtime-2602-online_evaluation.json` (online)
 - `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 - `results/ibm-granite_granite-4.0-1b-speech_evaluation.json`

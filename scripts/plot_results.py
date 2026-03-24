@@ -21,6 +21,21 @@ def load_all_results(results_dir: Path) -> List[Dict[str, Any]]:
     return results
 
 
+def _display_name(data: Dict) -> str:
+    """Derive display name from model field and filename.
+
+    Appends '(online)' or '(offline)' for Voxtral Realtime variants so both
+    modes are distinguishable in charts.
+    """
+    model = data.get("model", "Unknown")
+    filename = data.get("_file", "")
+    if "-online" in filename:
+        return model + " (online)"
+    if "Realtime" in model and "online" not in filename:
+        return model + " (offline)"
+    return model
+
+
 def extract_metrics(data: Dict) -> Dict:
     """Extract WER and CER metrics and compute variance from per-sample data."""
     per_sample = data.get("per_sample", [])
@@ -46,7 +61,7 @@ def extract_metrics(data: Dict) -> Dict:
     ort_cer_std = np.std(ort_cers) if ort_cers else 0
 
     return {
-        "model": data.get("model", "Unknown"),
+        "model": _display_name(data),
         "dialect_wer": dialect_mean,
         "dialect_std": dialect_std,
         "ort_wer": ort_mean,
