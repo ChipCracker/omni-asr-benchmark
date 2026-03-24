@@ -88,7 +88,7 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
                 **inputs,
                 do_sample=False,
                 temperature=0.0,
-                max_new_tokens=500,
+                max_new_tokens=4096,
             )
 
             decoded = self._processor.batch_decode(
@@ -111,7 +111,7 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
                         **inputs,
                         do_sample=False,
                         temperature=0.0,
-                        max_new_tokens=500,
+                        max_new_tokens=4096,
                     )
 
                     decoded = self._processor.batch_decode(
