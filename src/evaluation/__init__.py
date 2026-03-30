@@ -1,6 +1,7 @@
 """Evaluation modules for ASR models."""
 
 from .base_evaluator import BaseEvaluator, EvaluationResult, SampleResult
+from .cohere_transcribe_evaluator import CohereTranscribeEvaluator
 from .evaluator import OmniASREvaluator, get_evaluator
 from .metrics import compute_asr_metrics
 from .syllabic_asr_evaluator import SyllabicASREvaluator
@@ -9,6 +10,7 @@ from .voxtral_realtime_evaluator import VoxtralRealtimeEvaluator, VoxtralRealtim
 
 __all__ = [
     "BaseEvaluator",
+    "CohereTranscribeEvaluator",
     "compute_asr_metrics",
     "EvaluationResult",
     "get_evaluator",

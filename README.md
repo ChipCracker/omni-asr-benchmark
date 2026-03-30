@@ -21,6 +21,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **Phi-4 Multimodal** - Microsoft's Phi-4 multimodal model (e.g., `microsoft/Phi-4-multimodal-instruct`)
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 - **Granite Speech** - IBM Granite 4.0 1B Speech model (e.g., `ibm-granite/granite-4.0-1b-speech`, 6 languages)
+- **Cohere Transcribe** - Cohere's Conformer-based ASR model (e.g., `CohereLabs/cohere-transcribe-03-2026`, 2B params, 14 languages)
 
 ## Installation
 
@@ -62,6 +63,9 @@ pip install --upgrade "transformers>=5.2.0"
 
 # Install Phi-4 dependencies (optional, for Phi-4 Multimodal)
 pip install transformers>=4.48.2 soundfile flash-attn
+
+# Install Cohere Transcribe dependencies (optional)
+pip install --upgrade "transformers>=5.4.0" sentencepiece protobuf
 
 # Install VibeVoice dependencies (optional, for VibeVoice-ASR)
 git clone https://github.com/microsoft/VibeVoice.git
@@ -211,6 +215,14 @@ python scripts/evaluate_rvg1.py --model-card ibm-granite/granite-4.0-1b-speech -
 
 Note: Granite 4.0 1B Speech supports English, German, French, Spanish, Portuguese, and Japanese. Uses a Conformer speech encoder with Granite-4.0-1b-base.
 
+### Evaluate with Cohere Transcribe
+
+```bash
+python scripts/evaluate_rvg1.py --model-card CohereLabs/cohere-transcribe-03-2026 --batch-size 4
+```
+
+Note: Cohere Transcribe is a 2B parameter Conformer-based model supporting 14 languages including German (de), English (en), French (fr), and more. Requires transformers>=5.4.0. Supports native batching and automatic long-form audio handling.
+
 ## Output
 
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
@@ -234,6 +246,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/microsoft_Phi-4-multimodal-instruct_evaluation.json`
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 - `results/ibm-granite_granite-4.0-1b-speech_evaluation.json`
+- `results/CohereLabs_cohere-transcribe-03-2026_evaluation.json`
 
 Each result file contains:
 - Model and dataset metadata

@@ -187,6 +187,9 @@ def get_evaluator(
             model_name, language, batch_size,
             decode_mode=decode_mode, model_dir=model_dir,
         )
+    elif "cohere" in model_lower and "transcribe" in model_lower:
+        from .cohere_transcribe_evaluator import CohereTranscribeEvaluator
+        return CohereTranscribeEvaluator(model_name, language, batch_size)
     elif "granite" in model_lower:
         from .granite_evaluator import GraniteEvaluator
         return GraniteEvaluator(model_name, language, batch_size)
