@@ -187,6 +187,9 @@ def get_evaluator(
             model_name, language, batch_size,
             decode_mode=decode_mode, model_dir=model_dir,
         )
+    elif "stt_" in model_lower and "conformer" in model_lower:
+        from .nemo_stt_evaluator import NemoSTTEvaluator
+        return NemoSTTEvaluator(model_name, language, batch_size)
     elif "cohere" in model_lower and "transcribe" in model_lower:
         from .cohere_transcribe_evaluator import CohereTranscribeEvaluator
         return CohereTranscribeEvaluator(model_name, language, batch_size)

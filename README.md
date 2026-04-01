@@ -22,6 +22,7 @@ A framework for evaluating Automatic Speech Recognition (ASR) models on dialect 
 - **VibeVoice** - Microsoft's VibeVoice-ASR model (9B params, up to 60 min audio)
 - **Granite Speech** - IBM Granite 4.0 1B Speech model (e.g., `ibm-granite/granite-4.0-1b-speech`, 6 languages)
 - **Cohere Transcribe** - Cohere's Conformer-based ASR model (e.g., `CohereLabs/cohere-transcribe-03-2026`, 2B params, 14 languages)
+- **NeMo STT Conformer** - NVIDIA NeMo Conformer CTC/RNNT models (e.g., `nvidia/stt_de_conformer_ctc_large`, 120M params, German)
 
 ## Installation
 
@@ -223,6 +224,14 @@ python scripts/evaluate_rvg1.py --model-card CohereLabs/cohere-transcribe-03-202
 
 Note: Cohere Transcribe is a 2B parameter Conformer-based model supporting 14 languages including German (de), English (en), French (fr), and more. Requires transformers>=5.4.0. Supports native batching and automatic long-form audio handling.
 
+### Evaluate with NeMo STT Conformer
+
+```bash
+python scripts/evaluate_rvg1.py --model-card nvidia/stt_de_conformer_ctc_large --batch-size 16
+```
+
+Note: NeMo STT Conformer CTC Large is a 120M parameter German-only model. Requires nemo_toolkit[asr].
+
 ## Output
 
 Results are saved as JSON files in the `results/` directory with the model name as prefix:
@@ -247,6 +256,7 @@ Results are saved as JSON files in the `results/` directory with the model name 
 - `results/microsoft_VibeVoice-ASR_evaluation.json`
 - `results/ibm-granite_granite-4.0-1b-speech_evaluation.json`
 - `results/CohereLabs_cohere-transcribe-03-2026_evaluation.json`
+- `results/nvidia_stt_de_conformer_ctc_large_evaluation.json`
 
 Each result file contains:
 - Model and dataset metadata
