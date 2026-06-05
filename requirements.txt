@@ -15,3 +15,9 @@ soundfile>=0.12.0
 # Parakeet/NeMo (optional - for nvidia/parakeet-ctc-1.1b and similar models)
 # pip install nemo-toolkit[asr]
 # nemo-toolkit[asr]>=1.22.0
+
+# Gemma 4 multimodal (optional - for google/gemma-4-12B-it and similar models)
+# Requires a recent transformers with AutoModelForMultimodalLM / Gemma 4 support.
+# Long audio (>30s) is chunked with Silero VAD.
+# pip install -U transformers torch torchaudio silero-vad
+# silero-vad>=5.1

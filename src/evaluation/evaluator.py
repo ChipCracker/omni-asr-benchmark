@@ -196,6 +196,9 @@ def get_evaluator(
     elif "granite" in model_lower:
         from .granite_evaluator import GraniteEvaluator
         return GraniteEvaluator(model_name, language, batch_size)
+    elif "gemma" in model_lower:
+        from .gemma_evaluator import GemmaEvaluator
+        return GemmaEvaluator(model_name, language, batch_size)
     elif "omniasr" in model_lower or "omni-asr" in model_lower or "omni_asr" in model_lower:
         # OmniASR models (CTC-1B, LLM-7B, etc.)
         return OmniASREvaluator(model_name, language, batch_size)
