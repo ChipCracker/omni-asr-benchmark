@@ -163,15 +163,23 @@ class GemmaEvaluator(BaseEvaluator):
         """Transcribe a single <=30s audio chunk (mono, 16kHz float32)."""
         import torch
 
+        # Official Gemma 4 ASR prompt: explicitly constrains the instruct model to
+        # emit only the verbatim transcription (without it, the chat model drifts
+        # into "helpful assistant" commentary instead of transcribing).
+        prompt = (
+            f"Transcribe the following speech segment in {self._lang_name} into "
+            f"{self._lang_name} text.\n\n"
+            "Follow these specific instructions for formatting the answer:\n"
+            "* Only output the transcription, with no newlines.\n"
+            "* When transcribing numbers, write the digits, i.e. write 1.7 and not "
+            "one point seven, and write 3 instead of three."
+        )
         messages = [
             {
                 "role": "user",
                 "content": [
                     {"type": "audio", "audio": audio},
-                    {
-                        "type": "text",
-                        "text": f"Transcribe the audio to text in {self._lang_name}.",
-                    },
+                    {"type": "text", "text": prompt},
                 ],
             }
         ]
