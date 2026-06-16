@@ -12,12 +12,12 @@ from typing import List
 
 import numpy as np
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class VoxtralRealtimeEvaluator(BaseEvaluator):
+class VoxtralRealtimeEvaluator(AsrModel):
     """Evaluator for Mistral Voxtral Realtime models via HuggingFace Transformers.
 
     Uses the native Transformers integration for file-based transcription.
@@ -124,7 +124,7 @@ class VoxtralRealtimeEvaluator(BaseEvaluator):
             return results
 
 
-class VoxtralRealtimeOnlineEvaluator(BaseEvaluator):
+class VoxtralRealtimeOnlineEvaluator(AsrModel):
     """Evaluator for Voxtral Realtime in online/streaming mode.
 
     Simulates real-time streaming by splitting audio into chunks and feeding

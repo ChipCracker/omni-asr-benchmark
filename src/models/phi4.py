@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ LANGUAGE_MAP = {
 }
 
 
-class Phi4Evaluator(BaseEvaluator):
+class Phi4Evaluator(AsrModel):
     """Evaluator for Microsoft Phi-4 Multimodal models via HuggingFace Transformers.
 
     Supports transcription in English, Chinese, German, French, Italian,

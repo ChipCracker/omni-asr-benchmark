@@ -7,7 +7,8 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
-from .base_evaluator import BaseEvaluator, EvaluationResult, SampleResult
+from .base import AsrModel
+from ..benchmark.result import BenchmarkResult, SampleResult
 
 if TYPE_CHECKING:
     from ..datasets.base import DatasetSource
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class VibeVoiceEvaluator(BaseEvaluator):
+class VibeVoiceEvaluator(AsrModel):
     """Evaluator for Microsoft VibeVoice-ASR model.
 
     VibeVoice-ASR is a 9B parameter unified speech-to-text model that:
@@ -390,21 +391,23 @@ class VibeVoiceEvaluator(BaseEvaluator):
     def _select_best_speaker(
         self,
         speaker_transcripts: Dict[int, str],
-        dialect_ref: str,
-        ort_ref: Optional[str],
+        references: Dict[str, str],
     ) -> Tuple[str, int, Dict[str, Any]]:
-        """Select speaker with lowest WER.
+        """Select the speaker whose transcript best matches any reference.
+
+        Oracle selection: for each parsed speaker, the candidate score is the
+        minimum WER over all named references; the speaker with the lowest
+        candidate score wins.
 
         Args:
             speaker_transcripts: Dict mapping speaker_id -> transcript text.
-            dialect_ref: Dialect reference transcription.
-            ort_ref: Optional orthographic reference transcription.
+            references: Named references, e.g. ``{"ort": ..., "dialect": ...}``.
 
         Returns:
-            Tuple of (best_transcript, best_speaker_id, all_speaker_metrics).
-            all_speaker_metrics contains {speaker_id: {text, dialect_wer, ort_wer}}.
+            Tuple of (best_transcript, best_speaker_id, all_speaker_metrics),
+            where all_speaker_metrics maps speaker_id -> {text, <ref>_wer, <ref>_cer}.
         """
-        from .metrics import compute_single_sample_metrics
+        from ..benchmark.metrics import compute_single_sample_metrics
 
         all_speaker_metrics: Dict[str, Any] = {}
         best_speaker_id = 0
@@ -412,25 +415,17 @@ class VibeVoiceEvaluator(BaseEvaluator):
         best_transcript = ""
 
         for speaker_id, transcript in speaker_transcripts.items():
-            dialect_metrics = compute_single_sample_metrics(transcript, dialect_ref)
-            ort_metrics = (
-                compute_single_sample_metrics(transcript, ort_ref)
-                if ort_ref
-                else {"wer": None, "cer": None}
-            )
+            entry: Dict[str, Any] = {"text": transcript}
+            candidate_wer = float("inf")
+            for ref_name, ref_text in references.items():
+                if not ref_text:
+                    continue
+                m = compute_single_sample_metrics(transcript, ref_text)
+                entry[f"{ref_name}_wer"] = m["wer"]
+                entry[f"{ref_name}_cer"] = m["cer"]
+                candidate_wer = min(candidate_wer, m["wer"])
 
-            all_speaker_metrics[str(speaker_id)] = {
-                "text": transcript,
-                "dialect_wer": dialect_metrics["wer"],
-                "dialect_cer": dialect_metrics["cer"],
-                "ort_wer": ort_metrics["wer"],
-                "ort_cer": ort_metrics["cer"],
-            }
-
-            # Select based on minimum WER (prefer dialect, fall back to ort)
-            candidate_wer = dialect_metrics["wer"]
-            if ort_metrics["wer"] is not None:
-                candidate_wer = min(candidate_wer, ort_metrics["wer"])
+            all_speaker_metrics[str(speaker_id)] = entry
 
             if candidate_wer < best_wer:
                 best_wer = candidate_wer
@@ -439,171 +434,130 @@ class VibeVoiceEvaluator(BaseEvaluator):
 
         return best_transcript, best_speaker_id, all_speaker_metrics
 
-    def evaluate(
+    def benchmark(
         self,
-        dataset_source: "DatasetSource",
+        dataset: "DatasetSource",
         max_samples: Optional[int] = None,
         split: str = "test",
-    ) -> EvaluationResult:
-        """Evaluate the ASR model on a dataset with multi-speaker handling.
+        measure_speed: bool = True,
+    ) -> BenchmarkResult:
+        """Benchmark VibeVoice with multi-speaker oracle selection.
 
-        This override handles VibeVoice's multi-speaker output by:
-        1. Parsing speaker segments from JSON output
-        2. Computing WER for each speaker against references
-        3. Selecting the speaker with lowest WER as the hypothesis
-
-        Args:
-            dataset_source: The dataset source to evaluate on.
-            max_samples: Maximum number of samples to evaluate (None for all).
-            split: Dataset split to use.
-
-        Returns:
-            EvaluationResult containing metrics and per-sample results.
+        Overrides the generic engine because VibeVoice emits per-speaker
+        transcripts; for each sample it parses the speakers, scores each against
+        every named reference, and keeps the best-matching speaker as the
+        hypothesis. Metrics are then aggregated per reference, exactly like the
+        generic runner.
         """
-        from ..datasets.base import Sample
-        from .metrics import compute_asr_metrics, compute_single_sample_metrics
+        import time
+
+        from ..benchmark.metrics import compute_asr_metrics, compute_single_sample_metrics
 
         logger.info(
-            f"Starting evaluation: model={self.model_name}, dataset={dataset_source.name}, "
-            f"max_samples={max_samples}"
+            "Starting benchmark: model=%s, dataset=%s, max_samples=%s",
+            self.model_name,
+            dataset.name,
+            max_samples,
         )
 
-        samples: List[Sample] = list(
-            dataset_source.iter_samples(split=split, max_samples=max_samples)
-        )
-
+        samples = list(dataset.iter_samples(split=split, max_samples=max_samples))
         if not samples:
-            logger.warning("No samples found for evaluation")
-            return EvaluationResult(
-                model=self.model_name,
-                dataset=dataset_source.name,
+            logger.warning("No samples found for benchmark")
+            return BenchmarkResult(
+                model=self.display_name,
+                dataset=dataset.name,
                 language=self.language,
                 num_samples=0,
-                num_skipped=0,
             )
 
-        logger.info(f"Evaluating {len(samples)} samples")
+        self.load()
 
-        all_hypotheses: List[str] = []
-        dialect_references: List[str] = []
-        ort_references: List[str] = []
+        ref_names: List[str] = []
+        for sample in samples:
+            for name in sample.get_references():
+                if name not in ref_names:
+                    ref_names.append(name)
+        primary = next(
+            (s.primary_reference for s in samples if s.primary_reference in ref_names),
+            ref_names[0] if ref_names else "",
+        )
+
+        hyps_by_ref = {n: [] for n in ref_names}
+        refs_by_ref = {n: [] for n in ref_names}
         per_sample_results: List[SampleResult] = []
+        total_infer_s = 0.0
+        total_audio_s = 0.0
 
         for i, sample in enumerate(samples):
-            logger.info(f"Processing sample {i + 1}/{len(samples)}")
+            logger.info("Processing sample %d/%d", i + 1, len(samples))
+            refs = sample.get_references()
+            total_audio_s += sample.duration or 0.0
 
+            t0 = time.perf_counter()
             try:
-                # Get raw transcription
                 raw_output = self._transcribe_raw(sample.audio_path)
-
-                # Parse speaker transcripts
                 speaker_transcripts = self._parse_speaker_transcripts(raw_output)
-
-                # Select best speaker based on WER
                 best_transcript, best_speaker_id, all_speaker_metrics = (
-                    self._select_best_speaker(
-                        speaker_transcripts,
-                        sample.transcript,
-                        sample.ort_transcript,
-                    )
+                    self._select_best_speaker(speaker_transcripts, refs)
                 )
+            except Exception as e:  # noqa: BLE001
+                logger.error("Error processing sample %d: %s", i, e)
+                raw_output, best_transcript = "", ""
+                best_speaker_id, all_speaker_metrics = None, {}
+            total_infer_s += time.perf_counter() - t0
 
-                # Compute final metrics for selected speaker
-                dialect_metrics = compute_single_sample_metrics(
-                    best_transcript, sample.transcript
+            sample_metrics = {}
+            for name in ref_names:
+                ref_text = refs.get(name)
+                if ref_text:
+                    hyps_by_ref[name].append(best_transcript)
+                    refs_by_ref[name].append(ref_text)
+                    sample_metrics[name] = compute_single_sample_metrics(best_transcript, ref_text)
+
+            per_sample_results.append(
+                SampleResult(
+                    index=sample.dataset_info.get("index", i),
+                    audio_path=sample.audio_path or "",
+                    hypothesis=best_transcript,
+                    duration=sample.duration,
+                    references=refs,
+                    metrics=sample_metrics,
+                    speaker_id=sample.metadata.get("speaker_id"),
+                    raw_hypothesis=raw_output,
+                    extra={"selected_speaker": best_speaker_id, "all_speakers": all_speaker_metrics},
                 )
-                ort_metrics = (
-                    compute_single_sample_metrics(best_transcript, sample.ort_transcript)
-                    if sample.ort_transcript
-                    else {"wer": None, "cer": None}
-                )
+            )
 
-                all_hypotheses.append(best_transcript)
-                dialect_references.append(sample.transcript)
-                ort_references.append(sample.ort_transcript or "")
+        results = {}
+        for name in ref_names:
+            if hyps_by_ref[name]:
+                results[name] = compute_asr_metrics(hyps_by_ref[name], refs_by_ref[name])
 
-                per_sample_results.append(
-                    SampleResult(
-                        index=sample.dataset_info.get("index", i),
-                        audio_path=sample.audio_path or "",
-                        hypothesis=best_transcript,
-                        dialect_reference=sample.transcript,
-                        ort_reference=sample.ort_transcript,
-                        dialect_wer=dialect_metrics["wer"],
-                        dialect_cer=dialect_metrics["cer"],
-                        ort_wer=ort_metrics["wer"],
-                        ort_cer=ort_metrics["cer"],
-                        duration=sample.duration,
-                        speaker_id=sample.metadata.get("speaker_id"),
-                        raw_hypothesis=raw_output,
-                        selected_speaker=best_speaker_id,
-                        all_speakers=all_speaker_metrics,
-                    )
-                )
-
-                logger.debug(
-                    f"Sample {i}: selected speaker {best_speaker_id}, "
-                    f"dialect_wer={dialect_metrics['wer']:.2%}"
-                )
-
-            except Exception as e:
-                logger.error(f"Error processing sample {i}: {e}")
-                all_hypotheses.append("")
-                dialect_references.append(sample.transcript)
-                ort_references.append(sample.ort_transcript or "")
-
-                per_sample_results.append(
-                    SampleResult(
-                        index=sample.dataset_info.get("index", i),
-                        audio_path=sample.audio_path or "",
-                        hypothesis="",
-                        dialect_reference=sample.transcript,
-                        ort_reference=sample.ort_transcript,
-                        dialect_wer=1.0,
-                        dialect_cer=1.0,
-                        ort_wer=1.0 if sample.ort_transcript else None,
-                        ort_cer=1.0 if sample.ort_transcript else None,
-                        duration=sample.duration,
-                        speaker_id=sample.metadata.get("speaker_id"),
-                    )
-                )
-
-        # Compute aggregate metrics
-        dialect_metrics = compute_asr_metrics(all_hypotheses, dialect_references)
-
-        valid_ort_pairs = [
-            (hyp, ref) for hyp, ref in zip(all_hypotheses, ort_references) if ref
-        ]
-        if valid_ort_pairs:
-            ort_hyps, ort_refs = zip(*valid_ort_pairs)
-            ort_metrics = compute_asr_metrics(list(ort_hyps), list(ort_refs))
-        else:
-            ort_metrics = {
-                "wer": None,
-                "cer": None,
-                "substitutions": 0,
-                "deletions": 0,
-                "insertions": 0,
-                "num_samples": 0,
+        speed = {}
+        if measure_speed and total_infer_s > 0:
+            speed = {
+                "rtfx": total_audio_s / total_infer_s,
+                "total_audio_s": total_audio_s,
+                "total_infer_s": total_infer_s,
             }
 
-        result = EvaluationResult(
-            model=self.model_name,
-            dataset=dataset_source.name,
+        result = BenchmarkResult(
+            model=self.display_name,
+            dataset=dataset.name,
             language=self.language,
             num_samples=len(samples),
             num_skipped=0,
-            results={
-                "dialect_reference": dialect_metrics,
-                "ort_reference": ort_metrics,
-            },
+            references=[n for n in ref_names if n in results],
+            primary_reference=primary,
+            results=results,
+            speed=speed,
             per_sample=per_sample_results,
         )
 
+        primary_wer = results.get(primary, {}).get("wer")
         logger.info(
-            f"Evaluation complete: "
-            f"Dialect WER={dialect_metrics['wer']:.2%}"
-            + (f", ORT WER={ort_metrics['wer']:.2%}" if ort_metrics["wer"] else "")
+            "Benchmark complete: primary=%s WER=%s",
+            primary,
+            f"{primary_wer:.2%}" if primary_wer is not None else "n/a",
         )
-
         return result

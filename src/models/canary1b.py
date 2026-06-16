@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ LANGUAGE_MAP = {
 }
 
 
-class Canary1bEvaluator(BaseEvaluator):
+class Canary1bEvaluator(AsrModel):
     """Evaluator for NVIDIA Canary-1b-v2 model via NeMo ASRModel.
 
     Uses the ASRModel API with source_lang/target_lang parameters.

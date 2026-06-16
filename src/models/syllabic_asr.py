@@ -8,12 +8,12 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class SyllabicASREvaluator(BaseEvaluator):
+class SyllabicASREvaluator(AsrModel):
     """Evaluator for syllabic-asr models with CTC and RNNT decode modes.
 
     Uses the SyllabicASRPipeline from the syllabic-asr project.

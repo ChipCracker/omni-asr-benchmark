@@ -1,0 +1,40 @@
+# Benchmark matrix: which models x which datasets to run.
+#
+#   python scripts/submit_matrix.py --config configs/matrix.yaml            # SLURM (kiz0)
+#   python scripts/submit_matrix.py --config configs/matrix.yaml --local    # run locally
+#   python scripts/submit_matrix.py --config configs/matrix.yaml --dry-run  # print sbatch scripts
+#
+# ${ENV} references are expanded at submit time from the environment / .env.
+
+defaults:
+  language: deu_Latn
+  batch_size: 16
+  split: test
+
+datasets:
+  - name: bas_rvg1
+    data_dir: ${BAS_RVG1_DATA_DIR}
+    params:
+      channel: c
+
+models:
+  - name: openai/whisper-large-v3
+  - name: nyrahealth/CrisperWhisper
+  - name: nvidia/parakeet-tdt-0.6b-v3
+    batch_size: 8
+  - name: nvidia/canary-1b-v2
+    batch_size: 8
+  - name: mistralai/Voxtral-Mini-3B-2507
+    batch_size: 4
+  - name: mistralai/Voxtral-Small-24B-2507
+    batch_size: 1
+  - name: Qwen/Qwen3-ASR-1.7B
+  - name: Qwen/Qwen3-ASR-0.6B
+  - name: google/gemma-4-12B-it
+    batch_size: 1
+  - name: microsoft/Phi-4-multimodal-instruct
+    batch_size: 2
+  - name: microsoft/VibeVoice-ASR
+    batch_size: 1
+  # - name: syllabic-asr-ctc
+  #   extra_args: "--model-dir ${SYLLABIC_ASR_MODEL_DIR}"

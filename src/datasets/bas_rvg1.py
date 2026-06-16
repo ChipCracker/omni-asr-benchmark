@@ -156,9 +156,23 @@ class BasRvg1Source(DatasetSource):
                     if val is not None:
                         sample_metadata[f"speaker_{key}"] = val
 
+                # Named references for the generic benchmark engine. ORT is the
+                # primary (ranking) reference — standard orthography is the
+                # fairer cross-model metric — falling back to dialect when ORT
+                # is missing.
+                references = {
+                    "ort": ort_transcription,
+                    "dialect": dialect_transcription,
+                    "kan": kan_transcription,
+                }
+                references = {k: v for k, v in references.items() if v}
+                primary_reference = "ort" if ort_transcription else "dialect"
+
                 yield Sample(
                     transcript=transcript,
                     duration=duration,
+                    references=references,
+                    primary_reference=primary_reference,
                     dataset_info={
                         "dataset_name": self.name,
                         "language": "de",

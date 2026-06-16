@@ -1,17 +1,23 @@
-"""Whisper Evaluator using HuggingFace Transformers."""
+"""CrisperWhisper Evaluator using nyrahealth's custom transformers fork."""
 
 from __future__ import annotations
 
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class WhisperEvaluator(BaseEvaluator):
-    """Evaluator for OpenAI Whisper models via HuggingFace Transformers."""
+class CrisperWhisperEvaluator(AsrModel):
+    """Evaluator for CrisperWhisper models via nyrahealth's transformers fork.
+
+    CrisperWhisper is a fine-tuned Whisper Large V3 model that provides:
+    - Verbatim transcription (including filler words like "um", "uh")
+    - Improved word-level timestamps
+    - ~1% better WER than base Whisper Large V3
+    """
 
     # Mapping from omnilingual language codes to Whisper language names
     LANGUAGE_MAP = {
@@ -53,14 +59,14 @@ class WhisperEvaluator(BaseEvaluator):
 
     def __init__(
         self,
-        model_name: str = "openai/whisper-large-v3",
+        model_name: str = "nyrahealth/CrisperWhisper",
         language: str = "deu_Latn",
-        batch_size: int = 4,
+        batch_size: int = 16,
     ) -> None:
-        """Initialize the Whisper evaluator.
+        """Initialize the CrisperWhisper evaluator.
 
         Args:
-            model_name: HuggingFace model ID (e.g., "openai/whisper-large-v3").
+            model_name: HuggingFace model ID (e.g., "nyrahealth/CrisperWhisper").
             language: Language code for transcription (e.g., "deu_Latn").
             batch_size: Batch size for inference.
         """
@@ -69,32 +75,49 @@ class WhisperEvaluator(BaseEvaluator):
         self._whisper_language = self.LANGUAGE_MAP.get(language, "german")
 
     def _get_pipeline(self):
-        """Lazy-load the Whisper ASR pipeline."""
+        """Lazy-load the CrisperWhisper ASR pipeline."""
         if self._pipeline is None:
-            logger.info(f"Loading Whisper pipeline: {self.model_name}")
+            logger.info(f"Loading CrisperWhisper pipeline: {self.model_name}")
             try:
                 import torch
-                from transformers import pipeline
+                from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
-                device = "cuda:0" if torch.cuda.is_available() else "cpu"
+                device = "cuda" if torch.cuda.is_available() else "cpu"
                 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+                # Load model explicitly (required for CrisperWhisper)
+                model = AutoModelForSpeechSeq2Seq.from_pretrained(
+                    self.model_name,
+                    torch_dtype=torch_dtype,
+                    low_cpu_mem_usage=True,
+                    use_safetensors=True,
+                )
+                model.to(device)
+
+                # Load processor for tokenizer and feature extractor
+                processor = AutoProcessor.from_pretrained(self.model_name)
 
                 self._pipeline = pipeline(
                     "automatic-speech-recognition",
-                    model=self.model_name,
-                    device=device,
+                    model=model,
+                    tokenizer=processor.tokenizer,
+                    feature_extractor=processor.feature_extractor,
+                    chunk_length_s=30,
+                    batch_size=16,
+                    return_timestamps=False,  # Disabled - timestamps cause errors with some audio
                     torch_dtype=torch_dtype,
+                    device=device,
                 )
-                logger.info(f"Whisper pipeline loaded on {device}")
+                logger.info(f"CrisperWhisper pipeline loaded on {device}")
             except ImportError as e:
                 raise ImportError(
-                    "Whisper support requires transformers and torch. "
-                    "Install with: pip install transformers torch accelerate"
+                    "CrisperWhisper support requires nyrahealth's transformers fork. "
+                    "Install with: pip install git+https://github.com/nyrahealth/transformers.git@crisper_whisper"
                 ) from e
         return self._pipeline
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
-        """Transcribe a batch of audio files using Whisper.
+        """Transcribe a batch of audio files using CrisperWhisper.
 
         Args:
             audio_paths: List of paths to audio files.
@@ -109,15 +132,13 @@ class WhisperEvaluator(BaseEvaluator):
             "task": "transcribe",
         }
 
-        # Batch processing with HuggingFace Pipeline
+        # Batch processing (timestamps disabled to avoid calculation errors)
         outputs = pipe(
             audio_paths,
             generate_kwargs=generate_kwargs,
-            return_timestamps=True,  # Required for audio > 30 seconds
             batch_size=self.batch_size,
         )
 
-        # Extract results
         results = []
         for output in outputs:
             text = output.get("text", "").strip()

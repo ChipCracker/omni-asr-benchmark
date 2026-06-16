@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class NemoSTTEvaluator(BaseEvaluator):
+class NemoSTTEvaluator(AsrModel):
     """Evaluator for standard NVIDIA NeMo STT models.
 
     Handles NeMo CTC/RNNT Conformer models like stt_de_conformer_ctc_large.

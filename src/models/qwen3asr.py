@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ LANGUAGE_MAP = {
 }
 
 
-class Qwen3ASREvaluator(BaseEvaluator):
+class Qwen3ASREvaluator(AsrModel):
     """Evaluator for Qwen3-ASR models (0.6B and 1.7B) via qwen-asr library.
 
     Uses the Qwen3ASRModel API for transcription.

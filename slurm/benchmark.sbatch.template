@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --job-name={{JOB_NAME}}
+#SBATCH --partition={{PARTITION}}
+#SBATCH --gres={{GRES}}
+#SBATCH --qos={{QOS}}
+#SBATCH --account={{ACCOUNT}}
+#SBATCH --time={{TIME_LIMIT}}
+#SBATCH --output={{LOG_DIR}}/%x-%j.out
+#SBATCH --error={{LOG_DIR}}/%x-%j.err
+set -euo pipefail
+
+cd {{PROJECT_DIR}}
+{{MODULE_LOAD}}
+source {{VENV_PATH}}/bin/activate
+
+{{COMMANDS}}

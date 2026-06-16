@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class ParakeetEvaluator(BaseEvaluator):
+class ParakeetEvaluator(AsrModel):
     """Evaluator for NVIDIA Parakeet models via NeMo.
 
     Supports Parakeet CTC and TDT (Transducer) models from NVIDIA.

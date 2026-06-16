@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ LANGUAGE_MAP = {
 }
 
 
-class CohereTranscribeEvaluator(BaseEvaluator):
+class CohereTranscribeEvaluator(AsrModel):
     """Evaluator for Cohere Transcribe models via HuggingFace Transformers.
 
     Uses CohereAsrForConditionalGeneration + AutoProcessor for speech-to-text.

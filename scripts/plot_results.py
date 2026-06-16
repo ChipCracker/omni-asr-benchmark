@@ -1,34 +1,40 @@
 #!/usr/bin/env python3
-"""Visualize ASR evaluation results as bar chart."""
+"""Visualize ASR benchmark results (BAS RVG1: dialect vs ORT) as bar charts.
+
+Reads result JSONs via :class:`BenchmarkResult.from_dict`, so both the legacy
+(v1) and generic (v2) schemas work. For a color-coded leaderboard table across
+arbitrary datasets, see ``scripts/leaderboard.py``.
+"""
 
 import json
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Tuple
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from src.benchmark.result import BenchmarkResult  # noqa: E402
 
 
-def load_all_results(results_dir: Path) -> List[Dict[str, Any]]:
-    """Load all evaluation JSON files."""
+def load_all_results(results_dir: Path) -> List[Tuple[BenchmarkResult, str]]:
+    """Load all benchmark result JSON files as (result, filename) tuples."""
     results = []
-    for f in results_dir.glob("*evaluation*.json"):
-        if f.name.startswith("."):
+    for f in sorted(results_dir.glob("*.json")):
+        if f.name.startswith(".") or f.name == "leaderboard.json":
             continue
-        with open(f) as fp:
+        with open(f, encoding="utf-8") as fp:
             data = json.load(fp)
-            data["_file"] = f.name
-            results.append(data)
+        if not isinstance(data, dict) or "results" not in data:
+            continue
+        results.append((BenchmarkResult.from_dict(data), f.name))
     return results
 
 
-def _display_name(data: Dict) -> str:
-    """Derive display name from model field and filename.
-
-    Appends '(online)' or '(offline)' for Voxtral Realtime variants so both
-    modes are distinguishable in charts.
-    """
-    model = data.get("model", "Unknown")
-    filename = data.get("_file", "")
+def _display_name(result: BenchmarkResult, filename: str) -> str:
+    """Append '(online)'/'(offline)' for Voxtral Realtime variants."""
+    model = result.model
     if "-online" in filename:
         return model + " (online)"
     if "Realtime" in model and "online" not in filename:
@@ -36,39 +42,32 @@ def _display_name(data: Dict) -> str:
     return model
 
 
-def extract_metrics(data: Dict) -> Dict:
-    """Extract WER and CER metrics and compute variance from per-sample data."""
-    per_sample = data.get("per_sample", [])
+def _ref_mean_std(result: BenchmarkResult, ref: str, metric: str):
+    mean = result.results.get(ref, {}).get(metric)
+    per = [
+        s.metrics[ref][metric]
+        for s in result.per_sample
+        if ref in s.metrics and s.metrics[ref].get(metric) is not None
+    ]
+    return mean, (np.std(per) if per else 0)
 
-    # Dialect WER
-    dialect_wers = [s["dialect_wer"] for s in per_sample if s.get("dialect_wer") is not None]
-    dialect_mean = data["results"]["dialect_reference"]["wer"]
-    dialect_std = np.std(dialect_wers) if dialect_wers else 0
 
-    # ORT WER
-    ort_wers = [s["ort_wer"] for s in per_sample if s.get("ort_wer") is not None]
-    ort_mean = data["results"]["ort_reference"].get("wer")
-    ort_std = np.std(ort_wers) if ort_wers else 0
-
-    # Dialect CER
-    dialect_cers = [s["dialect_cer"] for s in per_sample if s.get("dialect_cer") is not None]
-    dialect_cer_mean = data["results"]["dialect_reference"]["cer"]
-    dialect_cer_std = np.std(dialect_cers) if dialect_cers else 0
-
-    # ORT CER
-    ort_cers = [s["ort_cer"] for s in per_sample if s.get("ort_cer") is not None]
-    ort_cer_mean = data["results"]["ort_reference"].get("cer")
-    ort_cer_std = np.std(ort_cers) if ort_cers else 0
-
+def extract_metrics(item: Tuple[BenchmarkResult, str]) -> Dict:
+    """Extract dialect/ORT WER+CER means and per-sample std."""
+    result, filename = item
+    dialect_wer, dialect_std = _ref_mean_std(result, "dialect", "wer")
+    ort_wer, ort_std = _ref_mean_std(result, "ort", "wer")
+    dialect_cer, dialect_cer_std = _ref_mean_std(result, "dialect", "cer")
+    ort_cer, ort_cer_std = _ref_mean_std(result, "ort", "cer")
     return {
-        "model": _display_name(data),
-        "dialect_wer": dialect_mean,
+        "model": _display_name(result, filename),
+        "dialect_wer": dialect_wer or 0,
         "dialect_std": dialect_std,
-        "ort_wer": ort_mean,
+        "ort_wer": ort_wer,
         "ort_std": ort_std,
-        "dialect_cer": dialect_cer_mean,
+        "dialect_cer": dialect_cer or 0,
         "dialect_cer_std": dialect_cer_std,
-        "ort_cer": ort_cer_mean,
+        "ort_cer": ort_cer,
         "ort_cer_std": ort_cer_std,
     }
 

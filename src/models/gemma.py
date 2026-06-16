@@ -14,7 +14,7 @@ from typing import List
 
 import numpy as np
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ MAX_CHUNK_SEC = 28.0  # safety margin below the model's 30s audio limit
 MIN_CHUNK_SEC = 1.0
 
 
-class GemmaEvaluator(BaseEvaluator):
+class GemmaEvaluator(AsrModel):
     """Evaluator for Google Gemma 4 multimodal models via HuggingFace Transformers.
 
     Audio longer than ~28s is segmented with Silero VAD and transcribed in chunks.
@@ -54,6 +54,15 @@ class GemmaEvaluator(BaseEvaluator):
         self._vad_model = None
         self._get_speech_timestamps = None
 
+        # Variant suffix: "<repo>-norepeat" enables anti-repetition decoding while
+        # still loading the real HF repo "<repo>". This keeps the plain greedy
+        # baseline and the anti-repetition run as two separate benchmark entries
+        # (distinct result files / chart bars) without duplicating the class.
+        self._anti_repeat = model_name.lower().endswith("-norepeat")
+        self._hf_model_name = (
+            model_name[: -len("-norepeat")] if self._anti_repeat else model_name
+        )
+
         self._lang_name = LANGUAGE_MAP.get(language, "English")
         if language not in LANGUAGE_MAP:
             logger.warning(
@@ -65,16 +74,19 @@ class GemmaEvaluator(BaseEvaluator):
         """Lazy-load the Gemma model and processor."""
         if self._model is not None:
             return
-        logger.info(f"Loading Gemma model: {self.model_name}")
+        logger.info(
+            f"Loading Gemma model: {self._hf_model_name} "
+            f"(anti_repeat={self._anti_repeat})"
+        )
         try:
             import torch
             from transformers import AutoProcessor, AutoModelForMultimodalLM
 
-            self._processor = AutoProcessor.from_pretrained(self.model_name)
+            self._processor = AutoProcessor.from_pretrained(self._hf_model_name)
 
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self._model = AutoModelForMultimodalLM.from_pretrained(
-                self.model_name,
+                self._hf_model_name,
                 dtype="auto",
                 device_map="auto" if device == "cuda" else None,
             )
@@ -192,12 +204,17 @@ class GemmaEvaluator(BaseEvaluator):
             return_tensors="pt",
         ).to(self._model.device)
 
+        gen_kwargs = dict(max_new_tokens=1024, do_sample=False)
+        if self._anti_repeat:
+            # The instruct model degenerates into repetition loops on some
+            # long/dialectal segments under pure greedy decoding (filling all
+            # 1024 tokens with a repeated n-gram). These guards stop that
+            # deterministically without introducing sampling noise.
+            gen_kwargs["no_repeat_ngram_size"] = 3
+            gen_kwargs["repetition_penalty"] = 1.15
+
         with torch.no_grad():
-            generate_ids = self._model.generate(
-                **inputs,
-                max_new_tokens=1024,
-                do_sample=False,
-            )
+            generate_ids = self._model.generate(**inputs, **gen_kwargs)
 
         generate_ids = generate_ids[:, inputs["input_ids"].shape[1]:]
         response = self._processor.batch_decode(

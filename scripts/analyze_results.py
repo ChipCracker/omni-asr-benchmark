@@ -7,31 +7,30 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from src.benchmark.result import BenchmarkResult  # noqa: E402
 
 
-def load_results(file_path: Path) -> Dict[str, Any]:
-    """Load evaluation results from JSON file."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+def print_summary(result: BenchmarkResult) -> None:
+    """Print a minimal benchmark summary (works for v1 and v2 results)."""
+    print(f"Model:    {result.model}")
+    print(f"Dataset:  {result.dataset}")
+    print(f"Language: {result.language}")
+    print(f"Time:     {result.timestamp}")
+    print(f"Samples:  {result.num_samples} (skipped {result.num_skipped})")
 
+    for ref, metrics in result.results.items():
+        marker = " (primary)" if ref == result.primary_reference else ""
+        wer = metrics.get("wer")
+        cer = metrics.get("cer")
+        wer_s = f"{wer:.2%}" if wer is not None else "n/a"
+        cer_s = f"{cer:.2%}" if cer is not None else "n/a"
+        print(f"{ref}{marker} WER/CER: {wer_s} / {cer_s}")
 
-def print_summary(data: Dict[str, Any]) -> None:
-    """Print a minimal evaluation summary."""
-    print(f"Model:    {data.get('model', 'N/A')}")
-    print(f"Dataset:  {data.get('dataset', 'N/A')}")
-    print(f"Language: {data.get('language', 'N/A')}")
-    print(f"Time:     {data.get('timestamp', 'N/A')}")
-    print(f"Samples:  {data.get('num_samples', 0)} (skipped {data.get('num_skipped', 0)})")
-
-    results = data.get("results", {})
-    dialect_res = results.get("dialect_reference", {})
-    if dialect_res:
-        print(f"Dialect WER/CER: {dialect_res.get('wer', 0):.2%} / {dialect_res.get('cer', 0):.2%}")
-
-    ort_res = results.get("ort_reference", {})
-    if ort_res and ort_res.get("wer") is not None:
-        print(f"ORT WER/CER:     {ort_res.get('wer', 0):.2%} / {ort_res.get('cer', 0):.2%}")
+    if result.speed.get("rtfx"):
+        print(f"RTFx:     {result.speed['rtfx']:.1f} (indicative)")
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,12 +58,13 @@ def main() -> int:
         return 1
 
     try:
-        data = load_results(args.result_file)
+        with open(args.result_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON file: {e}", file=sys.stderr)
         return 1
 
-    print_summary(data)
+    print_summary(BenchmarkResult.from_dict(data))
     return 0
 
 

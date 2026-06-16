@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ LANGUAGE_MAP = {
 }
 
 
-class GraniteEvaluator(BaseEvaluator):
+class GraniteEvaluator(AsrModel):
     """Evaluator for IBM Granite 4.0 Speech models via HuggingFace Transformers.
 
     Uses AutoModelForSpeechSeq2Seq + AutoProcessor for speech-to-text.

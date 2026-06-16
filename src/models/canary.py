@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
 
-class CanaryEvaluator(BaseEvaluator):
+class CanaryEvaluator(AsrModel):
     """Evaluator for NVIDIA Canary-Qwen models via NeMo SALM.
 
     Uses the Speech-Augmented Language Model (SALM) API for transcription.

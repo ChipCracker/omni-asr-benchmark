@@ -1,10 +1,55 @@
-# OmniASR Evaluation Framework
+# ASR Benchmark Framework
 
 ![Model Comparison Chart](results/comparison_chart.png)
 
 ![CER Comparison Chart](results/comparison_chart_cer.png)
 
-A framework for evaluating Automatic Speech Recognition (ASR) models on dialect speech datasets.
+A generic framework for benchmarking Automatic Speech Recognition (ASR) models on speech
+datasets. **Models** implement one interface (`src/models/base.py::AsrModel`), **datasets**
+implement another (`src/datasets/base.py::DatasetSource`), and the generic engine
+(`src/benchmark/runner.py`) scores any model × any dataset. After every run a color-coded
+leaderboard (HuggingFace Open ASR style) is printed.
+
+## Architecture
+
+| Component | Location | Role |
+|---|---|---|
+| Model interface | `src/models/base.py` (`AsrModel`) | `transcribe_batch(paths) -> texts`; lazy backend load |
+| Model registry | `src/models/registry.py` (`get_model`) | name → model instance |
+| Dataset interface | `src/datasets/base.py` (`DatasetSource` / `Sample`) | yields samples with **named references** (`ort`, `dialect`, `kan`, …) |
+| Dataset registry | `src/datasets/registry.py` (`get_dataset`) | name → dataset instance |
+| Engine | `src/benchmark/runner.py` (`run_benchmark`) | batched inference, per-reference WER/CER, RTFx |
+| Result schema | `src/benchmark/result.py` (`BenchmarkResult`) | v2 JSON; `from_dict` migrates legacy v1 results |
+| Leaderboard | `src/leaderboard/` | color-coded terminal table + HTML + Markdown |
+| SLURM (kiz0) | `slurm/`, `scripts/submit_matrix.py`, `configs/matrix.yaml` | submit model × dataset matrix |
+
+## Quickstart
+
+```bash
+# Benchmark one model on one dataset (prints the color-coded leaderboard after)
+python scripts/benchmark.py --model openai/whisper-large-v3 --dataset bas_rvg1 \
+    --data-dir $BAS_RVG1_DATA_DIR
+
+# Re-render the color-coded leaderboard from all results/ JSONs (no GPU needed)
+python scripts/leaderboard.py --export html,md          # writes results/leaderboard.{html,md}
+
+# Run the whole matrix on the kiz0 SLURM cluster (one job per model × dataset,
+# then an aggregation job that renders the leaderboard once all finish)
+python scripts/submit_matrix.py --config configs/matrix.yaml
+python scripts/submit_matrix.py --config configs/matrix.yaml --dry-run   # preview sbatch scripts
+python scripts/submit_matrix.py --config configs/matrix.yaml --local     # run sequentially, no SLURM
+```
+
+SLURM parameters live in `slurm/kiz0.env` (partition `p1,p2,p6`, `--gres=gpu:1`,
+`--qos=gpuultimate`, `--time=04:00:00`, venv activation). The benchmark matrix
+(which models × which datasets) lives in `configs/matrix.yaml`.
+
+### Adding a model or dataset
+
+- **Model:** subclass `AsrModel`, implement `transcribe_batch`, drop it in `src/models/`,
+  and add a routing branch to `src/models/registry.py`.
+- **Dataset:** subclass `DatasetSource`, yield `Sample`s with a `references` dict, and
+  register it in `src/datasets/registry.py`.
 
 ## Supported Models
 

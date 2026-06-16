@@ -1,4 +1,8 @@
-"""ASR evaluation metrics using jiwer."""
+"""ASR evaluation metrics using jiwer.
+
+Moved unchanged from ``src/evaluation/metrics.py`` so the generic benchmark
+engine and the (legacy) evaluation package share one implementation.
+"""
 
 import re
 import string

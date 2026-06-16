@@ -303,3 +303,15 @@ eval.err
 eval.out
 eval.slurm
 VibeVoice/**
+
+# SLURM generated job scripts and logs
+slurm/jobs/*.sbatch
+slurm/logs/*.out
+slurm/logs/*.err
+
+# Generated leaderboard exports
+results/leaderboard.html
+results/leaderboard.md
+
+# Local backup of migrated v1 results
+results/v1_backup/

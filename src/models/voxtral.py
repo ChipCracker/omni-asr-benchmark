@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from .base_evaluator import BaseEvaluator
+from .base import AsrModel
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ LANGUAGE_MAP = {
 }
 
 
-class VoxtralEvaluator(BaseEvaluator):
+class VoxtralEvaluator(AsrModel):
     """Evaluator for Mistral Voxtral models via HuggingFace Transformers.
 
     Supports transcription in English, Spanish, French, Portuguese,

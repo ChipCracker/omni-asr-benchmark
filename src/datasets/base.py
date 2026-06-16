@@ -12,16 +12,26 @@ from typing import Any, Dict, Iterable, Optional
 class Sample:
     """Represents a single sample from a dataset.
 
+    A sample may carry several *named references* (e.g. ``ort``, ``dialect``,
+    ``kan``). The benchmark scores the hypothesis against each one. ``transcript``
+    remains the single primary reference for backward compatibility; if
+    ``references`` is empty it is synthesized from ``transcript`` (+ legacy
+    ``ort_transcript``) by :meth:`get_references`.
+
     Attributes:
-        transcript: The reference transcription text.
+        transcript: The primary reference transcription text.
         duration: Audio duration in seconds.
         dataset_info: Dataset-level information (name, language, split, audio_path, etc.).
         metadata: Additional sample-specific metadata.
+        references: Named references, e.g. ``{"ort": ..., "dialect": ...}``.
+        primary_reference: Key in ``references`` used for ranking / averaging.
     """
     transcript: str
     duration: float
     dataset_info: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    references: Dict[str, str] = field(default_factory=dict)
+    primary_reference: str = "primary"
 
     @property
     def audio_path(self) -> Optional[str]:
@@ -31,7 +41,24 @@ class Sample:
     @property
     def ort_transcript(self) -> Optional[str]:
         """Get the standard orthography transcript if available."""
-        return self.metadata.get("ort_transcript")
+        return self.references.get("ort") or self.metadata.get("ort_transcript")
+
+    def get_references(self) -> Dict[str, str]:
+        """Return all non-empty named references for this sample.
+
+        Datasets that set ``references`` get them back verbatim. Older datasets
+        that only set ``transcript`` (+ ``metadata['ort_transcript']``) get a
+        synthesized mapping so the generic engine still works.
+        """
+        if self.references:
+            return {k: v for k, v in self.references.items() if v}
+        refs: Dict[str, str] = {}
+        if self.transcript:
+            refs[self.primary_reference if self.primary_reference != "primary" else "primary"] = self.transcript
+        ort = self.metadata.get("ort_transcript")
+        if ort:
+            refs["ort"] = ort
+        return refs
 
 
 class DatasetSource(ABC):
