@@ -13,7 +13,8 @@ defaults:
 
 datasets:
   - name: bas_rvg1
-    data_dir: ${BAS_RVG1_DATA_DIR}
+    # data_dir defaults to BasRvg1Source.DEFAULT_DATA_DIR; uncomment to override.
+    # data_dir: ${BAS_RVG1_DATA_DIR}
     params:
       channel: c
 

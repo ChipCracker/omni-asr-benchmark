@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import soundfile as sf
 from pathlib import Path
@@ -61,16 +62,31 @@ class BasRvg1Source(DatasetSource):
 
     name = "bas_rvg1"
 
+    #: Default location of the corpus (the directory containing the numeric
+    #: speaker folders). Overridable via the ``data_dir`` argument or the
+    #: ``BAS_RVG1_DATA_DIR`` environment variable.
+    DEFAULT_DATA_DIR = "/nfs/data/BAS-RVG1/RVG1_CLARIN"
+
     def __init__(
         self,
-        data_dir: str | Path,
+        data_dir: str | Path | None = None,
         channel: str = "c",
         cache_dir: Optional[Path] = None,
     ) -> None:
         super().__init__(cache_dir=cache_dir)
-        self.data_dir = Path(data_dir)
+        self.data_dir = Path(self._resolve_data_dir(data_dir))
         self.channel = channel
         self._speaker_metadata_cache: Optional[Dict[str, Dict[str, Optional[str]]]] = None
+
+    @classmethod
+    def _resolve_data_dir(cls, data_dir: str | Path | None) -> str | Path:
+        """Resolve the data dir: explicit arg > env var > class default."""
+        if data_dir:
+            return data_dir
+        env = os.getenv("BAS_RVG1_DATA_DIR")
+        if env:
+            return env
+        return cls.DEFAULT_DATA_DIR
 
     def iter_samples(
         self,

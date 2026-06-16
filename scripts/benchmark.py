@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -51,7 +50,8 @@ def parse_args() -> argparse.Namespace:
         "--data-dir",
         type=Path,
         default=None,
-        help="Dataset directory (defaults to BAS_RVG1_DATA_DIR for bas_rvg1).",
+        help="Override the dataset directory (otherwise the dataset class "
+        "default / BAS_RVG1_DATA_DIR is used).",
     )
     parser.add_argument("--language", default="deu_Latn", help="Language code.")
     parser.add_argument("--batch-size", type=int, default=16)
@@ -81,19 +81,15 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _resolve_data_dir(args: argparse.Namespace, logger: logging.Logger) -> Path | None:
+def _build_dataset_params(args: argparse.Namespace) -> dict:
+    """Dataset constructor params. Extend here when adding datasets.
+
+    ``data_dir`` is only passed when explicitly given; otherwise the dataset
+    class resolves its own default (and the ``BAS_RVG1_DATA_DIR`` env var).
+    """
+    params: dict = {}
     if args.data_dir is not None:
-        return args.data_dir
-    env = os.getenv("BAS_RVG1_DATA_DIR")
-    if env:
-        return Path(env)
-    logger.error("No --data-dir given and BAS_RVG1_DATA_DIR is not set.")
-    return None
-
-
-def _build_dataset_params(args: argparse.Namespace, data_dir: Path) -> dict:
-    """Dataset constructor params. Extend here when adding datasets."""
-    params = {"data_dir": data_dir}
+        params["data_dir"] = args.data_dir
     if args.dataset.lower().replace("-", "_") in ("bas_rvg1", "basrvg1source"):
         params["channel"] = args.channel
     return params
@@ -105,22 +101,15 @@ def main() -> int:
     logger = logging.getLogger(__name__)
     load_dotenv()
 
-    data_dir = _resolve_data_dir(args, logger)
-    if data_dir is None:
-        return 1
-    if not data_dir.exists():
-        logger.error("Data directory does not exist: %s", data_dir)
-        return 1
-
     model_safe = args.model.replace("/", "_").replace("\\", "_")
     output_path = args.output or Path(f"results/{model_safe}__{args.dataset}.json")
 
     logger.info("Model:   %s", args.model)
-    logger.info("Dataset: %s (%s)", args.dataset, data_dir)
+    logger.info("Dataset: %s", args.dataset)
     logger.info("Output:  %s", output_path)
 
     try:
-        dataset = get_dataset(args.dataset, **_build_dataset_params(args, data_dir))
+        dataset = get_dataset(args.dataset, **_build_dataset_params(args))
     except KeyError as e:
         logger.error(str(e))
         return 1
