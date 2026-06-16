@@ -12,7 +12,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..benchmark.result import BenchmarkResult
 
@@ -45,6 +45,7 @@ class Leaderboard:
     columns: List[Column]            # ordered (dataset, reference)
     primary_by_dataset: Dict[str, str]
     rows: List[Row]                  # sorted by average_wer ascending
+    dataset_meta: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
 
 def _display_name(result: BenchmarkResult, filename: str) -> str:
@@ -159,9 +160,22 @@ def build_leaderboard(
     for i, row in enumerate(rows, start=1):
         row.rank = i
 
+    # Per-dataset metadata for the "corpus used" banner.
+    dataset_meta: Dict[str, Dict[str, Any]] = {}
+    for dataset in dataset_order:
+        ds_results = [r for (_, ds), r in by_model_dataset.items() if ds == dataset]
+        dataset_meta[dataset] = {
+            "samples": max((r.num_samples for r in ds_results), default=0),
+            "references": [ref for (d, ref) in columns if d == dataset],
+            "primary": primary_by_dataset.get(dataset, ""),
+            "models": len(ds_results),
+            "language": next((r.language for r in ds_results if r.language), ""),
+        }
+
     return Leaderboard(
         datasets=dataset_order,
         columns=columns,
         primary_by_dataset=primary_by_dataset,
         rows=rows,
+        dataset_meta=dataset_meta,
     )
