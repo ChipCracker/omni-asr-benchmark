@@ -90,15 +90,27 @@ class AsrHttpEvaluator(AsrModel):
     def _parse_transcript(result) -> str:
         if isinstance(result, str):
             return result
-        if isinstance(result, dict):
-            text = result.get("text") or result.get("transcript") or ""
-            if not text:
-                rlist = result.get("result", [])
-                if isinstance(rlist, list) and rlist:
-                    first = rlist[0]
-                    text = first.get("transcript_formatted") or first.get("transcript") or ""
-            return text or ""
-        return ""
+        if not isinstance(result, dict):
+            return ""
+        # Direct text field (some servers).
+        text = result.get("text") or result.get("transcript") or ""
+        if text:
+            return text
+        # Otherwise the server returns a list of VAD segments — concatenate ALL
+        # of them in order (taking only the first segment truncates long audio).
+        rlist = result.get("result", [])
+        if not isinstance(rlist, list):
+            return ""
+        segs = [s for s in rlist if isinstance(s, dict)]
+        try:
+            segs.sort(key=lambda s: s.get("result_index", 0))
+        except (TypeError, ValueError):
+            pass
+        parts = [
+            (s.get("transcript_formatted") or s.get("transcript") or "").strip()
+            for s in segs
+        ]
+        return " ".join(p for p in parts if p)
 
     def _transcribe_one(self, audio_path: str) -> str:
         import requests
