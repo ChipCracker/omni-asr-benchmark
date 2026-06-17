@@ -18,31 +18,29 @@ def _fmt_rtfx(value: Optional[float]) -> str:
     return f"{value:.1f}" if value is not None else "–"
 
 
-def _fmt_wer_cer(wer: Optional[float], cer: Optional[float]) -> str:
-    if wer is None and cer is None:
-        return "–"
-    return f"{_fmt_pct(wer)} / {_fmt_pct(cer)}"
-
-
 def _column_header(column: Column, multi_dataset: bool) -> str:
     dataset, ref = column
     return f"{dataset}\n{ref.upper()}" if multi_dataset else ref.upper()
 
 
-def _column_stats(lb: Leaderboard) -> Dict[Column, Tuple[float, float, Optional[float]]]:
-    """Per column: (vmin, vmax, best_wer)."""
+def _metric_stats(lb: Leaderboard, metric: str) -> Dict[Column, Tuple[float, float, Optional[float]]]:
+    """Per column: (vmin, vmax, best) for the given metric ('wer' or 'cer')."""
     stats: Dict[Column, Tuple[float, float, Optional[float]]] = {}
     for col in lb.columns:
-        values = [row.cells[col].wer for row in lb.rows if col in row.cells]
+        values = [getattr(row.cells[col], metric) for row in lb.rows if col in row.cells]
         vmin, vmax = column_bounds(values)
         present = [v for v in values if v is not None]
-        best = min(present) if present else None
-        stats[col] = (vmin, vmax, best)
-    # Average column shares the same idea over the average values.
-    avgs = [row.average_wer for row in lb.rows if row.average_wer is not None]
+        stats[col] = (vmin, vmax, min(present) if present else None)
+    avgs = [getattr(row, f"average_{metric}") for row in lb.rows
+            if getattr(row, f"average_{metric}") is not None]
     vmin, vmax = column_bounds(avgs)
     stats[("__avg__", "")] = (vmin, vmax, min(avgs) if avgs else None)
     return stats
+
+
+def _column_stats(lb: Leaderboard) -> Dict[Column, Tuple[float, float, Optional[float]]]:
+    """WER stats per column (kept for the bar-chart data payload)."""
+    return _metric_stats(lb, "wer")
 
 
 # --------------------------------------------------------------------------- #
@@ -61,40 +59,50 @@ def render_terminal(lb: Leaderboard, console=None, show_rtfx: bool = True) -> No
         return
 
     multi = len(lb.datasets) > 1
-    stats = _column_stats(lb)
+    wer_stats = _metric_stats(lb, "wer")
+    cer_stats = _metric_stats(lb, "cer")
+    avg_col = ("__avg__", "")
 
-    title = "ASR Leaderboard — WER / CER by dataset/reference (green = better, color by WER)"
-    table = Table(title=title, box=box.ROUNDED, header_style="bold", title_style="bold")
+    # Ordered display columns: each reference contributes a WER and a CER column.
+    metric_cols = []  # (header, col_key, metric, stats)
+    for col in lb.columns:
+        head = _column_header(col, multi)
+        metric_cols.append((f"{head}\nWER", col, "wer", wer_stats))
+        metric_cols.append((f"{head}\nCER", col, "cer", cer_stats))
+    metric_cols.append(("Avg\nWER", avg_col, "wer", wer_stats))
+    metric_cols.append(("Avg\nCER", avg_col, "cer", cer_stats))
+
+    def value_of(row, col_key, metric):
+        if col_key == avg_col:
+            return getattr(row, f"average_{metric}")
+        cell = row.cells.get(col_key)
+        return getattr(cell, metric) if cell else None
+
+    table = Table(
+        title="ASR Leaderboard — WER & CER by dataset/reference (green = better)",
+        box=box.ROUNDED, header_style="bold", title_style="bold",
+    )
     table.add_column("#", justify="right", no_wrap=True)
     table.add_column("Model", justify="left", no_wrap=True)
-    for col in lb.columns:
-        table.add_column(_column_header(col, multi) + "\nWER/CER", justify="right")
-    table.add_column("Avg\nWER/CER", justify="right", style="bold")
+    for header, _, metric, _ in metric_cols:
+        table.add_column(header, justify="right", style="bold" if "Avg" in header else None)
     if show_rtfx:
         table.add_column("RTFx", justify="right")
 
     for row in lb.rows:
         cells: List[Text] = [Text(str(row.rank)), Text(row.model)]
-        for col in lb.columns:
-            cell = row.cells.get(col)
-            wer = cell.wer if cell else None
-            cer = cell.cer if cell else None
-            vmin, vmax, best = stats[col]
-            is_best = wer is not None and best is not None and abs(wer - best) < 1e-9
-            cells.append(Text(_fmt_wer_cer(wer, cer), style=rich_style(wer, vmin, vmax, is_best)))
-        vmin, vmax, best = stats[("__avg__", "")]
-        is_best = row.average_wer is not None and best is not None and abs(row.average_wer - best) < 1e-9
-        cells.append(
-            Text(_fmt_wer_cer(row.average_wer, row.average_cer),
-                 style=rich_style(row.average_wer, vmin, vmax, is_best))
-        )
+        for _, col_key, metric, st in metric_cols:
+            v = value_of(row, col_key, metric)
+            vmin, vmax, best = st[col_key]
+            is_best = v is not None and best is not None and abs(v - best) < 1e-9
+            cells.append(Text(_fmt_pct(v), style=rich_style(v, vmin, vmax, is_best)))
         if show_rtfx:
             cells.append(Text(_fmt_rtfx(row.rtfx)))
         table.add_row(*cells)
 
     console.print(table)
     console.print(
-        "[dim]Cells show WER / CER, colored by WER (per-column scale, vmin=min, vmax=90th pct). "
+        "[dim]Separate WER & CER columns, each colored per-column (vmin=min, vmax=90th pct). "
         "Avg uses each dataset's primary reference. RTFx is indicative.[/dim]"
     )
 
@@ -129,27 +137,42 @@ def _corpus_banner(lb: Leaderboard) -> str:
 def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
     """Return a standalone, self-sorting HTML document with colored cells."""
     multi = len(lb.datasets) > 1
-    stats = _column_stats(lb)
+    wer_stats = _metric_stats(lb, "wer")
+    cer_stats = _metric_stats(lb, "cer")
+    avg_col = ("__avg__", "")
 
-    def cell_html(wer: Optional[float], cer: Optional[float], col_key: Column) -> str:
-        vmin, vmax, best = stats[col_key]
-        label = _fmt_wer_cer(wer, cer)
-        if wer is None:
-            return f'<td class="missing" data-sort="{_BIG}">{label}</td>'
-        rgb = wer_rgb(wer, vmin, vmax)
+    # Separate WER and CER columns per reference (+ Avg WER / Avg CER).
+    metric_cols = []  # (header, col_key, metric, stats)
+    for col in lb.columns:
+        head = _column_header(col, multi).replace("\n", " ")
+        metric_cols.append((f"{head} WER", col, "wer", wer_stats))
+        metric_cols.append((f"{head} CER", col, "cer", cer_stats))
+    metric_cols.append(("Avg WER", avg_col, "wer", wer_stats))
+    metric_cols.append(("Avg CER", avg_col, "cer", cer_stats))
+
+    def value_of(row, col_key, metric):
+        if col_key == avg_col:
+            return getattr(row, f"average_{metric}")
+        cell = row.cells.get(col_key)
+        return getattr(cell, metric) if cell else None
+
+    def cell_html(value: Optional[float], st) -> str:
+        vmin, vmax, best = st
+        if value is None:
+            return f'<td class="missing" data-sort="{_BIG}">–</td>'
+        rgb = wer_rgb(value, vmin, vmax)
         fg = text_on(rgb)
-        is_best = best is not None and abs(wer - best) < 1e-9
+        is_best = best is not None and abs(value - best) < 1e-9
         cls = "wer best" if is_best else "wer"
         bg = f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
         return (
-            f'<td class="{cls}" data-sort="{wer:.6f}">'
-            f'<span class="pill" style="background:{bg};color:{fg}">{label}</span></td>'
+            f'<td class="{cls}" data-sort="{value:.6f}">'
+            f'<span class="pill" style="background:{bg};color:{fg}">{_fmt_pct(value)}</span></td>'
         )
 
-    # Header (with sort metadata). Cells show "WER / CER", sorted/colored by WER.
+    # Header (with sort metadata). Each WER/CER column sorts/colors independently.
     heads = [("#", "num"), ("Model", "str")]
-    heads += [(_column_header(c, multi).replace("\n", " ") + " WER/CER", "num") for c in lb.columns]
-    heads.append(("Avg WER/CER", "num"))
+    heads += [(h, "num") for h, _, _, _ in metric_cols]
     if show_rtfx:
         heads.append(("RTFx", "num"))
     header_cells = "".join(
@@ -167,10 +190,8 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
             f'<td class="rank" data-sort="{row.rank}">{rank_label}</td>',
             f'<td class="model" data-sort="{_html.escape(row.model.lower())}">{_html.escape(row.model)}</td>',
         ]
-        for col in lb.columns:
-            cell = row.cells.get(col)
-            tds.append(cell_html(cell.wer if cell else None, cell.cer if cell else None, col))
-        tds.append(cell_html(row.average_wer, row.average_cer, ("__avg__", "")))
+        for _, col_key, metric, st in metric_cols:
+            tds.append(cell_html(value_of(row, col_key, metric), st[col_key]))
         if show_rtfx:
             rtfx_sort = f"{row.rtfx:.6f}" if row.rtfx is not None else _BIG
             tds.append(f'<td class="rtfx" data-sort="{rtfx_sort}">{_fmt_rtfx(row.rtfx)}</td>')
@@ -188,9 +209,9 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
     col_defs.append({"key": "__avg__", "label": "Avg WER"})
     bounds = {}
     for c in lb.columns:
-        vmin, vmax, _ = stats[c]
+        vmin, vmax, _ = wer_stats[c]
         bounds[f"{c[0]}::{c[1]}"] = [vmin, vmax]
-    avmin, avmax, _ = stats[("__avg__", "")]
+    avmin, avmax, _ = wer_stats[("__avg__", "")]
     bounds["__avg__"] = [avmin, avmax]
     rows_data = []
     for row in lb.rows:
@@ -249,8 +270,9 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
   td.rank {{ font-size:1.05rem; }}
   td.missing {{ color:#8c959f; }}
   td.rtfx {{ color:var(--muted); }}
-  .pill {{ display:inline-block; min-width:6.8rem; padding:.18rem .55rem; border-radius:999px;
-           font-weight:600; font-size:.82rem; white-space:nowrap; }}
+  .pill {{ display:inline-block; min-width:3.6rem; padding:.18rem .5rem; border-radius:999px;
+           font-weight:600; font-size:.84rem; white-space:nowrap; }}
+  thead th {{ font-size:.72rem; }}
   td.best .pill {{ outline:2px solid rgba(31,35,40,.45); font-weight:800; }}
   .legend {{ margin-top:1rem; color:var(--muted); font-size:.82rem; line-height:1.5; }}
   .legend .swatch {{ display:inline-block; width:120px; height:.6rem; border-radius:4px; vertical-align:middle;
@@ -333,8 +355,8 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
   <div id="detailList"></div>
 </div>
 <p class="legend">
-  <span class="swatch"></span> low&nbsp;WER&nbsp;→&nbsp;high &nbsp;·&nbsp;
-  Cells show <b>WER&nbsp;/&nbsp;CER</b> (colored &amp; sorted by WER). &nbsp;·&nbsp;
+  <span class="swatch"></span> low&nbsp;→&nbsp;high &nbsp;·&nbsp;
+  Separate <b>WER</b> and <b>CER</b> columns, each colored &amp; sortable independently. &nbsp;·&nbsp;
   Color scale is per column (min … 90th percentile). &nbsp;·&nbsp;
   <b>★</b> marks each dataset's primary reference (drives Avg&nbsp;WER &amp; ranking). &nbsp;·&nbsp;
   Bold/outlined = best in column. &nbsp;·&nbsp; RTFx (real-time factor) is indicative.
@@ -526,36 +548,47 @@ def render_markdown(lb: Leaderboard, show_rtfx: bool = True) -> str:
     from tabulate import tabulate
 
     multi = len(lb.datasets) > 1
-    stats = _column_stats(lb)
-    headers = (
-        ["#", "Model"]
-        + [_column_header(c, multi).replace("\n", " ") + " (WER/CER)" for c in lb.columns]
-        + ["Avg (WER/CER)"]
-    )
+    wer_stats = _metric_stats(lb, "wer")
+    cer_stats = _metric_stats(lb, "cer")
+    avg_col = ("__avg__", "")
+
+    metric_cols = []  # (header, col_key, metric, stats)
+    for col in lb.columns:
+        head = _column_header(col, multi).replace("\n", " ")
+        metric_cols.append((f"{head} WER", col, "wer", wer_stats))
+        metric_cols.append((f"{head} CER", col, "cer", cer_stats))
+    metric_cols.append(("Avg WER", avg_col, "wer", wer_stats))
+    metric_cols.append(("Avg CER", avg_col, "cer", cer_stats))
+
+    headers = ["#", "Model"] + [h for h, _, _, _ in metric_cols]
     if show_rtfx:
         headers.append("RTFx")
 
-    def mark(wer: Optional[float], cer: Optional[float], col_key: Column) -> str:
-        s = _fmt_wer_cer(wer, cer)
-        if wer is None:
+    def value_of(row, col_key, metric):
+        if col_key == avg_col:
+            return getattr(row, f"average_{metric}")
+        cell = row.cells.get(col_key)
+        return getattr(cell, metric) if cell else None
+
+    def mark(value: Optional[float], st) -> str:
+        s = _fmt_pct(value)
+        if value is None:
             return s
-        _, _, best = stats[col_key]
-        return f"**{s}**" if best is not None and abs(wer - best) < 1e-9 else s
+        _, _, best = st
+        return f"**{s}**" if best is not None and abs(value - best) < 1e-9 else s
 
     table_rows = []
     for row in lb.rows:
         cols = [str(row.rank), row.model]
-        for col in lb.columns:
-            cell = row.cells.get(col)
-            cols.append(mark(cell.wer if cell else None, cell.cer if cell else None, col))
-        cols.append(mark(row.average_wer, row.average_cer, ("__avg__", "")))
+        for _, col_key, metric, st in metric_cols:
+            cols.append(mark(value_of(row, col_key, metric), st[col_key]))
         if show_rtfx:
             cols.append(_fmt_rtfx(row.rtfx))
         table_rows.append(cols)
 
     table = tabulate(table_rows, headers=headers, tablefmt="github")
     legend = (
-        "\n\n_Cells show WER / CER; **bold** = best WER in column. "
+        "\n\n_Separate WER and CER columns; **bold** = best in column. "
         "Avg uses each dataset's primary reference; RTFx is indicative._\n"
     )
     return "# ASR Leaderboard\n\n" + table + legend
