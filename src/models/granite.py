@@ -1,4 +1,10 @@
-"""IBM Granite 4.0 1B Speech Evaluator using HuggingFace Transformers."""
+"""IBM Granite Speech evaluator using HuggingFace Transformers.
+
+Supports the Granite Speech 4.x family, e.g. ``ibm-granite/granite-4.0-1b-speech``
+and ``ibm-granite/granite-speech-4.1-2b``. Both share the same API
+(``AutoProcessor`` + ``AutoModelForSpeechSeq2Seq`` with an ``<|audio|>`` chat
+prompt) and require ``transformers>=4.52.1`` plus ``peft`` (LoRA adapter).
+"""
 
 from __future__ import annotations
 
@@ -21,15 +27,17 @@ LANGUAGE_MAP = {
 
 
 class GraniteEvaluator(AsrModel):
-    """Evaluator for IBM Granite 4.0 Speech models via HuggingFace Transformers.
+    """Evaluator for IBM Granite Speech models via HuggingFace Transformers.
 
     Uses AutoModelForSpeechSeq2Seq + AutoProcessor for speech-to-text.
-    Supports English, German, French, Spanish, Portuguese, and Japanese.
+    Covers the Granite Speech 4.x family (e.g. granite-4.0-1b-speech,
+    granite-speech-4.1-2b). Supports English, German, French, Spanish,
+    Portuguese, and Japanese.
     """
 
     def __init__(
         self,
-        model_name: str = "ibm-granite/granite-4.0-1b-speech",
+        model_name: str = "ibm-granite/granite-speech-4.1-2b",
         language: str = "deu_Latn",
         batch_size: int = 1,
     ) -> None:
@@ -94,11 +102,11 @@ class GraniteEvaluator(AsrModel):
                 if waveform.shape[0] > 1:
                     waveform = waveform.mean(dim=0, keepdim=True)
 
-                # Build chat prompt with audio placeholder
+                # Build chat prompt with audio placeholder (official ASR prompt)
                 chat = [
                     {
                         "role": "user",
-                        "content": "<|audio|>can you transcribe the speech into a written format?",
+                        "content": "<|audio|>transcribe the speech with proper punctuation and capitalization.",
                     }
                 ]
                 text = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
