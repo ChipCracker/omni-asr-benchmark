@@ -33,6 +33,10 @@ def get_model(
     """
     model_lower = model_name.lower()
 
+    # Remote HTTP ASR server (model name is the server URL). No local GPU.
+    if model_lower.startswith("http://") or model_lower.startswith("https://"):
+        from .asr_http import AsrHttpEvaluator
+        return AsrHttpEvaluator(model_name, language, batch_size)
     # CrisperWhisper must be checked before generic whisper.
     if "crisperwhisper" in model_lower or "crisper" in model_lower:
         from .crisperwhisper import CrisperWhisperEvaluator
