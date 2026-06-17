@@ -46,6 +46,11 @@ class Leaderboard:
     primary_by_dataset: Dict[str, str]
     rows: List[Row]                  # sorted by average_wer ascending
     dataset_meta: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    # Per-utterance drill-down (used by the HTML export):
+    #   ground_truth[dataset][index] = {"spk", "dur", "refs": {ref: text}}   (GT deduped across models)
+    #   details[model][dataset] = [ {"i", "hyp", "m": {ref: [wer, cer]}} ]
+    ground_truth: Dict[str, Dict[int, Dict[str, Any]]] = field(default_factory=dict)
+    details: Dict[str, Dict[str, List[Dict[str, Any]]]] = field(default_factory=dict)
 
 
 def _display_name(result: BenchmarkResult, filename: str) -> str:
@@ -172,10 +177,36 @@ def build_leaderboard(
             "language": next((r.language for r in ds_results if r.language), ""),
         }
 
+    # Per-utterance drill-down: ground truth deduped across models,
+    # hypotheses + metrics kept per model.
+    ground_truth: Dict[str, Dict[int, Dict[str, Any]]] = {}
+    details: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+    for (name, dataset), result in by_model_dataset.items():
+        gt_ds = ground_truth.setdefault(dataset, {})
+        rows_out: List[Dict[str, Any]] = []
+        for s in result.per_sample:
+            idx = s.index
+            g = gt_ds.setdefault(idx, {"spk": s.speaker_id, "dur": round(s.duration or 0.0, 1), "refs": {}})
+            for ref_name, ref_text in s.references.items():
+                if ref_text and ref_name not in g["refs"]:
+                    g["refs"][ref_name] = ref_text
+            m = {}
+            for ref_name, mm in s.metrics.items():
+                wer = mm.get("wer")
+                cer = mm.get("cer")
+                m[ref_name] = [
+                    round(wer, 4) if wer is not None else None,
+                    round(cer, 4) if cer is not None else None,
+                ]
+            rows_out.append({"i": idx, "hyp": s.hypothesis, "m": m})
+        details.setdefault(name, {})[dataset] = rows_out
+
     return Leaderboard(
         datasets=dataset_order,
         columns=columns,
         primary_by_dataset=primary_by_dataset,
         rows=rows,
         dataset_meta=dataset_meta,
+        ground_truth=ground_truth,
+        details=details,
     )

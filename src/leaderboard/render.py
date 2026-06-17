@@ -163,7 +163,11 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
         if show_rtfx:
             rtfx_sort = f"{row.rtfx:.6f}" if row.rtfx is not None else _BIG
             tds.append(f'<td class="rtfx" data-sort="{rtfx_sort}">{_fmt_rtfx(row.rtfx)}</td>')
-        body_rows.append("<tr>" + "".join(tds) + "</tr>")
+        body_rows.append(
+            f'<tr class="model-row" data-row="{_html.escape(row.model)}" '
+            f'onclick="openDetails(this)" title="Show per-utterance details">'
+            + "".join(tds) + "</tr>"
+        )
 
     # Data payload for the client-side bar-chart view.
     col_defs = [
@@ -183,8 +187,17 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
         cells["__avg__"] = row.average_wer
         rows_data.append({"model": row.model, "rank": row.rank, "cells": cells})
     data_json = json.dumps(
-        {"columns": col_defs, "bounds": bounds, "rows": rows_data, "defaultMetric": "__avg__"}
+        {
+            "columns": col_defs,
+            "bounds": bounds,
+            "rows": rows_data,
+            "defaultMetric": "__avg__",
+            "primaryByDataset": lb.primary_by_dataset,
+        }
     ).replace("</", "<\\/")
+    # Per-utterance drill-down payloads (ground truth deduped, hyp+metrics per model).
+    gt_json = json.dumps(lb.ground_truth).replace("</", "<\\/")
+    details_json = json.dumps(lb.details).replace("</", "<\\/")
 
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
@@ -243,7 +256,7 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
                          background:var(--card); color:var(--text); }}
   /* Bar chart */
   #chartView {{ padding:1.2rem 1.3rem; }}
-  .bar-row {{ display:grid; grid-template-columns:230px 1fr; align-items:center; gap:.8rem; margin:.32rem 0; }}
+  .bar-row {{ display:grid; grid-template-columns:230px 1fr; align-items:center; gap:.8rem; margin:.32rem 0; cursor:pointer; }}
   .bar-label {{ font-size:.85rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
   .bar-label .rk {{ color:var(--muted); font-weight:500; margin-right:.35rem; }}
   .bar-track {{ position:relative; background:#eef1f5; border-radius:8px; height:1.5rem; }}
@@ -251,6 +264,27 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
   .bar-val {{ position:absolute; top:0; height:100%; display:flex; align-items:center; padding-left:.45rem;
               font-size:.78rem; font-weight:700; color:var(--text); }}
   @media (max-width:640px) {{ .bar-row {{ grid-template-columns:130px 1fr; }} }}
+  tbody tr.model-row {{ cursor:pointer; }}
+  /* Detail drill-down */
+  .detail-bar {{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; padding:.7rem 1rem; border-bottom:1px solid var(--line); }}
+  .detail-bar .back {{ border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit;
+                       font-size:.85rem; padding:.4rem .7rem; border-radius:8px; cursor:pointer; }}
+  .detail-bar .back:hover {{ background:#eef1f5; }}
+  #detailTitle {{ font-weight:700; }}
+  .detail-bar label {{ color:var(--muted); font-size:.85rem; display:inline-flex; align-items:center; gap:.35rem; }}
+  .detail-bar select, .filter {{ font:inherit; padding:.32rem .5rem; border-radius:8px; border:1px solid var(--line);
+                                 background:var(--card); color:var(--text); }}
+  #detailMeta {{ color:var(--muted); font-size:.8rem; padding:.3rem 1rem 0; }}
+  #detailList {{ padding:.5rem 1rem 1rem; max-height:72vh; overflow:auto; }}
+  .utt {{ border:1px solid var(--line); border-radius:10px; padding:.55rem .75rem; margin:.5rem 0; }}
+  .utt-head {{ color:var(--muted); font-size:.76rem; margin-bottom:.35rem; }}
+  .utt-hyp {{ background:#eef4ff; border-left:3px solid var(--accent); border-radius:4px;
+              padding:.3rem .5rem; margin:.25rem 0 .45rem; }}
+  .utt-ref {{ display:grid; grid-template-columns:3rem 8.5rem 1fr; gap:.5rem; align-items:baseline; margin:.18rem 0; font-size:.9rem; }}
+  .lbl {{ font-weight:700; font-size:.72rem; color:var(--muted); }}
+  .wercer {{ font-size:.74rem; padding:.05rem .4rem; border-radius:6px; font-weight:600; white-space:nowrap; }}
+  .gt {{ color:var(--text); }}
+  @media (max-width:640px) {{ .utt-ref {{ grid-template-columns:1fr; gap:.1rem; }} }}
 </style></head>
 <body><div class="wrap">
 <header>
@@ -270,6 +304,21 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
 <tbody>{''.join(body_rows)}</tbody></table>
 </div>
 <div class="card" id="chartView" hidden></div>
+<div class="card" id="detailView" hidden>
+  <div class="detail-bar">
+    <button class="back" onclick="closeDetails()">&larr; Back</button>
+    <span id="detailTitle"></span>
+    <label>Dataset <select id="detailDataset" onchange="renderDetails()"></select></label>
+    <label>Sort <select id="detailSort" onchange="renderDetails()">
+      <option value="i">by index</option>
+      <option value="worst">worst WER first</option>
+      <option value="best">best WER first</option>
+    </select></label>
+    <input id="detailFilter" class="filter" placeholder="filter hyp / GT text…" oninput="renderDetails()">
+  </div>
+  <div id="detailMeta"></div>
+  <div id="detailList"></div>
+</div>
 <p class="legend">
   <span class="swatch"></span> low&nbsp;WER&nbsp;→&nbsp;high &nbsp;·&nbsp;
   Color scale is per column (min … 90th percentile). &nbsp;·&nbsp;
@@ -280,6 +329,89 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
 </div>
 <script>
 const DATA = {data_json};
+const GT = {gt_json};
+const DETAILS = {details_json};
+const REF_LABELS = {{ort:'ORT', dialect:'TR2', kan:'KAN'}};
+const REF_ORDER = ['ort','dialect','kan'];
+let _detailRow = null;
+
+function esc(s) {{ const d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML; }}
+function escAttr(s) {{ return esc(s).replace(/"/g,'&quot;'); }}
+
+function openDetails(el) {{
+  _detailRow = el.dataset.row;
+  if (!DETAILS[_detailRow]) return;
+  document.querySelector('.toolbar').style.display = 'none';
+  document.getElementById('tableView').hidden = true;
+  document.getElementById('chartView').hidden = true;
+  const sel = document.getElementById('detailDataset');
+  sel.innerHTML = '';
+  Object.keys(DETAILS[_detailRow]).forEach(ds => {{
+    const o = document.createElement('option'); o.value = ds; o.textContent = ds; sel.appendChild(o);
+  }});
+  document.getElementById('detailTitle').textContent = _detailRow;
+  document.getElementById('detailFilter').value = '';
+  document.getElementById('detailSort').value = 'i';
+  document.getElementById('detailView').hidden = false;
+  renderDetails();
+  window.scrollTo(0, 0);
+}}
+
+function closeDetails() {{
+  document.getElementById('detailView').hidden = true;
+  document.querySelector('.toolbar').style.display = 'flex';
+  setView('table');
+}}
+
+function refColor(wer) {{
+  if (wer == null) return 'background:#e5e9ef;color:#555';
+  const c = werRgb(wer, 0, 1);
+  const fg = (0.299*c[0]+0.587*c[1]+0.114*c[2]) > 140 ? '#000' : '#fff';
+  return `background:rgb(${{c[0]}},${{c[1]}},${{c[2]}});color:${{fg}}`;
+}}
+
+function renderDetails() {{
+  const row = _detailRow;
+  const ds = document.getElementById('detailDataset').value;
+  const sortMode = document.getElementById('detailSort').value;
+  const q = (document.getElementById('detailFilter').value || '').toLowerCase().trim();
+  const items = (DETAILS[row] && DETAILS[row][ds]) ? DETAILS[row][ds].slice() : [];
+  const gt = GT[ds] || {{}};
+  const primary = (DATA.primaryByDataset && DATA.primaryByDataset[ds]) || REF_ORDER[0];
+  const val = (it) => {{ const m = it.m[primary]; return (m && m[0] != null) ? m[0] : null; }};
+  const cmp = (a, b, dir) => {{ const x = val(a), y = val(b);
+    if (x == null && y == null) return a.i - b.i; if (x == null) return 1; if (y == null) return -1; return dir*(x - y); }};
+  if (sortMode === 'worst') items.sort((a, b) => cmp(a, b, -1));
+  else if (sortMode === 'best') items.sort((a, b) => cmp(a, b, 1));
+  else items.sort((a, b) => a.i - b.i);
+
+  let shown = 0, html = '';
+  for (const it of items) {{
+    const g = gt[String(it.i)] || {{refs: {{}}}};
+    if (q) {{
+      let hay = (it.hyp || '').toLowerCase();
+      for (const k in (g.refs||{{}})) hay += ' ' + (g.refs[k] || '').toLowerCase();
+      if (!hay.includes(q)) continue;
+    }}
+    shown++;
+    const refs = REF_ORDER.filter(r => (g.refs && g.refs[r] != null) || (it.m && it.m[r]));
+    let refsHtml = '';
+    for (const r of refs) {{
+      const m = (it.m && it.m[r]) || [null, null];
+      const wc = (m[0] == null ? '–' : 'WER ' + (m[0]*100).toFixed(1) + '%')
+               + (m[1] == null ? '' : ' · CER ' + (m[1]*100).toFixed(1) + '%');
+      refsHtml += `<div class="utt-ref"><span class="lbl">${{esc(REF_LABELS[r]||r.toUpperCase())}}</span>`
+                + `<span class="wercer" style="${{refColor(m[0])}}">${{wc}}</span>`
+                + `<span class="gt">${{esc((g.refs && g.refs[r]) || '')}}</span></div>`;
+    }}
+    const head = `#${{it.i}}` + (g.spk ? ` · spk ${{esc(g.spk)}}` : '') + (g.dur ? ` · ${{g.dur}}s` : '');
+    html += `<div class="utt"><div class="utt-head">${{head}}</div>`
+          + `<div class="utt-hyp"><span class="lbl">HYP</span> <span class="gt">${{esc(it.hyp)}}</span></div>`
+          + refsHtml + `</div>`;
+  }}
+  document.getElementById('detailMeta').textContent = shown + ' / ' + items.length + ' utterances';
+  document.getElementById('detailList').innerHTML = html || '<p style="color:var(--muted)">No matches.</p>';
+}}
 
 function sortTable(th) {{
   const table = th.closest('table');
@@ -335,8 +467,9 @@ function renderChart() {{
     const w = wer == null ? 0 : Math.max(1, (wer / scaleMax) * 100);
     const c = werRgb(wer, vmin, vmax);
     const bg = `rgb(${{c[0]}},${{c[1]}},${{c[2]}})`;
-    html += `<div class="bar-row"><div class="bar-label" title="${{r.model}}">`
-          + `<span class="rk">${{i+1}}</span>${{r.model}}</div>`
+    const ra = escAttr(r.model);
+    html += `<div class="bar-row" data-row="${{ra}}" onclick="openDetails(this)" title="${{ra}} — click for details">`
+          + `<div class="bar-label"><span class="rk">${{i+1}}</span>${{esc(r.model)}}</div>`
           + `<div class="bar-track"><div class="bar-fill" style="width:${{w}}%;background:${{bg}}"></div>`
           + `<div class="bar-val">${{pct}}</div></div></div>`;
   }});
