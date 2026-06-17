@@ -41,5 +41,7 @@ models:
     batch_size: 1
   - name: ibm-granite/granite-speech-4.1-2b-nar
     batch_size: 1
+  - name: CohereLabs/cohere-transcribe-03-2026
+    batch_size: 4
   # - name: syllabic-asr-ctc
   #   extra_args: "--model-dir ${SYLLABIC_ASR_MODEL_DIR}"

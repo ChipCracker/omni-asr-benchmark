@@ -36,6 +36,7 @@ class Row:
     cells: Dict[Column, Cell] = field(default_factory=dict)
     rtfx: Optional[float] = None
     average_wer: Optional[float] = None
+    average_cer: Optional[float] = None
     rank: int = 0
 
 
@@ -144,6 +145,7 @@ def build_leaderboard(
         row = Row(model=name)
         rtfx_values: List[float] = []
         primary_wers: List[float] = []
+        primary_cers: List[float] = []
         for dataset in dataset_order:
             result = by_model_dataset.get((name, dataset))
             if result is None:
@@ -154,10 +156,13 @@ def build_leaderboard(
             pm = result.results.get(primary, {})
             if pm.get("wer") is not None:
                 primary_wers.append(pm["wer"])
+            if pm.get("cer") is not None:
+                primary_cers.append(pm["cer"])
             rtfx = result.speed.get("rtfx")
             if rtfx:
                 rtfx_values.append(rtfx)
         row.average_wer = sum(primary_wers) / len(primary_wers) if primary_wers else None
+        row.average_cer = sum(primary_cers) / len(primary_cers) if primary_cers else None
         row.rtfx = sum(rtfx_values) / len(rtfx_values) if rtfx_values else None
         rows.append(row)
 
