@@ -10,12 +10,17 @@ from typing import Callable, Dict
 
 from .base import DatasetSource
 from .bas_rvg1 import BasRvg1Source
+from .manifest import KsofSource, ManifestSource
 
 # Both the canonical ``name`` and the class name resolve to the same factory,
 # so YAML entries can use either ``bas_rvg1`` or ``BasRvg1Source``.
 _DATASETS: Dict[str, Callable[..., DatasetSource]] = {
     "bas_rvg1": BasRvg1Source,
     "basrvg1source": BasRvg1Source,
+    "ksof": KsofSource,
+    "ksofsource": KsofSource,
+    "manifest": ManifestSource,
+    "manifestsource": ManifestSource,
 }
 
 

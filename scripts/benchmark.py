@@ -64,6 +64,13 @@ def parse_args() -> argparse.Namespace:
         help="BAS RVG1 audio channel (c=close, h=headset, l=laryngograph).",
     )
     parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="JSONL manifest path (for ksof / generic manifest datasets; "
+        "ksof has a default).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -88,10 +95,13 @@ def _build_dataset_params(args: argparse.Namespace) -> dict:
     class resolves its own default (and the ``BAS_RVG1_DATA_DIR`` env var).
     """
     params: dict = {}
+    ds_key = args.dataset.lower().replace("-", "_")
     if args.data_dir is not None:
         params["data_dir"] = args.data_dir
-    if args.dataset.lower().replace("-", "_") in ("bas_rvg1", "basrvg1source"):
+    if ds_key in ("bas_rvg1", "basrvg1source"):
         params["channel"] = args.channel
+    if args.manifest is not None:
+        params["manifest_path"] = args.manifest
     return params
 
 

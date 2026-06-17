@@ -17,6 +17,8 @@ datasets:
     # data_dir: ${BAS_RVG1_DATA_DIR}
     params:
       channel: c
+  - name: ksof
+    # NeMo-style manifest; KsofSource.DEFAULT_MANIFEST = manifests/ksof-manifest.jsonl
 
 models:
   - name: openai/whisper-large-v3
