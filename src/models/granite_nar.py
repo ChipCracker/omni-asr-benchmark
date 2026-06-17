@@ -43,13 +43,12 @@ class GraniteNarEvaluator(AsrModel):
     def _load_model(self) -> None:
         if self._model is not None:
             return
-        logger.info("Loading Granite NAR model: %s (attn=%s)", self.model_name, self._attn)
         try:
             import torch
             from transformers import AutoModel, AutoProcessor
         except ImportError as e:
             raise ImportError(
-                "Granite NAR needs transformers>=5.5.3, torch>=2.9 and flash-attn. "
+                "Granite NAR needs transformers>=5.5.3 and torch>=2.9. "
                 f"Original error: {e}"
             ) from e
 
@@ -57,17 +56,37 @@ class GraniteNarEvaluator(AsrModel):
         self._device = device
         dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
-        self._model = AutoModel.from_pretrained(
-            self.model_name,
-            trust_remote_code=True,
-            attn_implementation=self._attn,
-            device_map=device,
-            dtype=dtype,
-        ).eval()
-        self._processor = AutoProcessor.from_pretrained(
-            self.model_name, trust_remote_code=True
-        )
-        logger.info("Granite NAR model loaded on %s with %s", device, dtype)
+        # Prefer flash_attention_2 (model default) but fall back to sdpa/eager
+        # when flash-attn is not installed — avoids a fragile source build.
+        attn_candidates = []
+        for attn in (self._attn, "sdpa", "eager"):
+            if attn and attn not in attn_candidates:
+                attn_candidates.append(attn)
+
+        last_err = None
+        for attn in attn_candidates:
+            try:
+                logger.info("Loading Granite NAR %s (attn=%s)", self.model_name, attn)
+                self._model = AutoModel.from_pretrained(
+                    self.model_name,
+                    trust_remote_code=True,
+                    attn_implementation=attn,
+                    device_map=device,
+                    dtype=dtype,
+                ).eval()
+                self._attn = attn
+                break
+            except (ImportError, ValueError) as e:
+                logger.warning("attn_implementation=%s unavailable (%s); trying next", attn, e)
+                last_err = e
+
+        if self._model is None:
+            raise ImportError(
+                f"Could not load Granite NAR with any attention implementation. Last error: {last_err}"
+            )
+
+        self._processor = AutoProcessor.from_pretrained(self.model_name, trust_remote_code=True)
+        logger.info("Granite NAR model loaded on %s with %s (attn=%s)", device, dtype, self._attn)
 
     def _transcribe(self, waveforms: List["torch.Tensor"]) -> List[str]:  # noqa: F821
         import torch
