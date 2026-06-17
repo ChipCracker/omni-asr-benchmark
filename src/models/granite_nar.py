@@ -97,15 +97,20 @@ class GraniteNarEvaluator(AsrModel):
         return [t.strip() for t in self._processor.batch_decode(output.preds)]
 
     def transcribe_batch(self, audio_paths: List[str]) -> List[str]:
-        import torchaudio
+        import soundfile as sf
+        import torch
 
         self._load_model()
 
-        # Load + resample to 16 kHz mono.
+        # Load + resample to 16 kHz mono. Use soundfile rather than
+        # torchaudio.load (torchaudio>=2.9 routes load() through torchcodec,
+        # which needs FFmpeg); soundfile reads these WAVs directly.
         waveforms = []
         for path in audio_paths:
-            waveform, sr = torchaudio.load(path)
+            data, sr = sf.read(path, dtype="float32", always_2d=True)  # (frames, channels)
+            waveform = torch.from_numpy(data.T)  # (channels, frames)
             if sr != 16000:
+                import torchaudio
                 waveform = torchaudio.functional.resample(waveform, sr, 16000)
             if waveform.shape[0] > 1:
                 waveform = waveform.mean(dim=0, keepdim=True)
