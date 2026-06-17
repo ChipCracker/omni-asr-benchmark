@@ -107,11 +107,15 @@ class GraniteEvaluator(AsrModel):
                 duration_s = waveform.shape[-1] / sr
                 max_new = min(1024, max(256, int(duration_s * 8)))
 
-                # Build chat prompt with audio placeholder (official ASR prompt)
+                # Build chat prompt with audio placeholder (official ASR prompt).
+                # Steer the target language so --language actually takes effect.
                 chat = [
                     {
                         "role": "user",
-                        "content": "<|audio|>transcribe the speech with proper punctuation and capitalization.",
+                        "content": (
+                            f"<|audio|>transcribe the {self._lang_name} speech "
+                            f"with proper punctuation and capitalization."
+                        ),
                     }
                 ]
                 text = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
