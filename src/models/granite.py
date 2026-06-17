@@ -102,6 +102,11 @@ class GraniteEvaluator(AsrModel):
                 if waveform.shape[0] > 1:
                     waveform = waveform.mean(dim=0, keepdim=True)
 
+                # Scale generation length to audio duration so long-form
+                # utterances (RVG1 monologues run up to ~130s) are not truncated.
+                duration_s = waveform.shape[-1] / sr
+                max_new = min(1024, max(256, int(duration_s * 8)))
+
                 # Build chat prompt with audio placeholder (official ASR prompt)
                 chat = [
                     {
@@ -123,7 +128,7 @@ class GraniteEvaluator(AsrModel):
                 with torch.no_grad():
                     output_ids = self._model.generate(
                         **model_inputs,
-                        max_new_tokens=200,
+                        max_new_tokens=max_new,
                         do_sample=False,
                         num_beams=1,
                     )
