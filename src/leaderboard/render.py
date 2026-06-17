@@ -142,13 +142,15 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
     avg_col = ("__avg__", "")
 
     # Separate WER and CER columns per reference (+ Avg WER / Avg CER).
-    metric_cols = []  # (header, col_key, metric, stats)
+    # Each metric column carries its dataset (for the dataset filter); Avg/meta
+    # columns use "__meta__" and stay visible regardless of the selected dataset.
+    metric_cols = []  # (header, col_key, metric, stats, ds)
     for col in lb.columns:
         head = _column_header(col, multi).replace("\n", " ")
-        metric_cols.append((f"{head} WER", col, "wer", wer_stats))
-        metric_cols.append((f"{head} CER", col, "cer", cer_stats))
-    metric_cols.append(("Avg WER", avg_col, "wer", wer_stats))
-    metric_cols.append(("Avg CER", avg_col, "cer", cer_stats))
+        metric_cols.append((f"{head} WER", col, "wer", wer_stats, col[0]))
+        metric_cols.append((f"{head} CER", col, "cer", cer_stats, col[0]))
+    metric_cols.append(("Avg WER", avg_col, "wer", wer_stats, "__meta__"))
+    metric_cols.append(("Avg CER", avg_col, "cer", cer_stats, "__meta__"))
 
     def value_of(row, col_key, metric):
         if col_key == avg_col:
@@ -156,29 +158,29 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
         cell = row.cells.get(col_key)
         return getattr(cell, metric) if cell else None
 
-    def cell_html(value: Optional[float], st) -> str:
+    def cell_html(value: Optional[float], st, ds: str) -> str:
         vmin, vmax, best = st
         if value is None:
-            return f'<td class="missing" data-sort="{_BIG}">–</td>'
+            return f'<td class="missing" data-ds="{_html.escape(ds)}" data-sort="{_BIG}">–</td>'
         rgb = wer_rgb(value, vmin, vmax)
         fg = text_on(rgb)
         is_best = best is not None and abs(value - best) < 1e-9
         cls = "wer best" if is_best else "wer"
         bg = f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
         return (
-            f'<td class="{cls}" data-sort="{value:.6f}">'
+            f'<td class="{cls}" data-ds="{_html.escape(ds)}" data-sort="{value:.6f}">'
             f'<span class="pill" style="background:{bg};color:{fg}">{_fmt_pct(value)}</span></td>'
         )
 
-    # Header (with sort metadata). Each WER/CER column sorts/colors independently.
-    heads = [("#", "num"), ("Model", "str")]
-    heads += [(h, "num") for h, _, _, _ in metric_cols]
+    # Header (with sort + dataset-filter metadata).
+    heads = [("#", "num", "__meta__"), ("Model", "str", "__meta__")]
+    heads += [(h, "num", ds) for h, _, _, _, ds in metric_cols]
     if show_rtfx:
-        heads.append(("RTFx", "num"))
+        heads.append(("RTFx", "num", "__meta__"))
     header_cells = "".join(
-        f'<th data-type="{t}" onclick="sortTable(this)"><span>{_html.escape(h)}</span>'
-        f'<span class="arrow"></span></th>'
-        for h, t in heads
+        f'<th data-type="{t}" data-ds="{_html.escape(ds)}" onclick="sortTable(this)">'
+        f'<span>{_html.escape(h)}</span><span class="arrow"></span></th>'
+        for h, t, ds in heads
     )
 
     # Rows.
@@ -187,14 +189,14 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
     for row in lb.rows:
         rank_label = medals.get(row.rank, str(row.rank))
         tds = [
-            f'<td class="rank" data-sort="{row.rank}">{rank_label}</td>',
-            f'<td class="model" data-sort="{_html.escape(row.model.lower())}">{_html.escape(row.model)}</td>',
+            f'<td class="rank" data-ds="__meta__" data-sort="{row.rank}">{rank_label}</td>',
+            f'<td class="model" data-ds="__meta__" data-sort="{_html.escape(row.model.lower())}">{_html.escape(row.model)}</td>',
         ]
-        for _, col_key, metric, st in metric_cols:
-            tds.append(cell_html(value_of(row, col_key, metric), st[col_key]))
+        for _, col_key, metric, st, ds in metric_cols:
+            tds.append(cell_html(value_of(row, col_key, metric), st[col_key], ds))
         if show_rtfx:
             rtfx_sort = f"{row.rtfx:.6f}" if row.rtfx is not None else _BIG
-            tds.append(f'<td class="rtfx" data-sort="{rtfx_sort}">{_fmt_rtfx(row.rtfx)}</td>')
+            tds.append(f'<td class="rtfx" data-ds="__meta__" data-sort="{rtfx_sort}">{_fmt_rtfx(row.rtfx)}</td>')
         body_rows.append(
             f'<tr class="model-row" data-row="{_html.escape(row.model)}" '
             f'onclick="openDetails(this)" title="Show per-utterance details">'
@@ -225,6 +227,7 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
             "rows": rows_data,
             "defaultMetric": "__avg__",
             "primaryByDataset": lb.primary_by_dataset,
+            "datasets": lb.datasets,
         }
     ).replace("</", "<\\/")
     # Per-utterance drill-down payloads (ground truth deduped, hyp+metrics per model).
@@ -285,6 +288,9 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
                     padding:.45rem .9rem; cursor:pointer; }}
   .toggle button.active {{ background:var(--accent); color:#fff; }}
   .metric-pick {{ display:none; align-items:center; gap:.4rem; color:var(--muted); font-size:.85rem; }}
+  .ds-pick {{ display:inline-flex; align-items:center; gap:.4rem; color:var(--muted); font-size:.85rem; }}
+  .ds-pick select {{ font:inherit; padding:.35rem .5rem; border-radius:8px; border:1px solid var(--line);
+                     background:var(--card); color:var(--text); }}
   .metric-pick select {{ font:inherit; padding:.35rem .5rem; border-radius:8px; border:1px solid var(--line);
                          background:var(--card); color:var(--text); }}
   /* Bar chart */
@@ -330,6 +336,7 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
     <button id="btnTable" class="active" onclick="setView('table')">▦ Table</button>
     <button id="btnChart" onclick="setView('chart')">▮ Bar chart</button>
   </div>
+  <label class="ds-pick" id="dsPick">Dataset <select id="dsFilter" onchange="selectDataset(this.value)"></select></label>
   <label class="metric-pick" id="metricPick">Metric <select id="metric" onchange="renderChart()"></select></label>
 </div>
 <div class="card" id="tableView">
@@ -494,9 +501,19 @@ function setView(view) {{
   document.getElementById('tableView').hidden = isChart;
   document.getElementById('chartView').hidden = !isChart;
   document.getElementById('metricPick').style.display = isChart ? 'inline-flex' : 'none';
+  document.getElementById('dsPick').style.display = isChart ? 'none' : 'inline-flex';
   document.getElementById('btnChart').classList.toggle('active', isChart);
   document.getElementById('btnTable').classList.toggle('active', !isChart);
   if (isChart) renderChart();
+}}
+
+// Show only the selected dataset's columns ("__all__" shows everything; meta
+// columns — rank/model/Avg/RTFx — always stay visible).
+function selectDataset(ds) {{
+  document.querySelectorAll('#lb [data-ds]').forEach(el => {{
+    const d = el.dataset.ds;
+    el.style.display = (ds === '__all__' || d === '__meta__' || d === ds) ? '' : 'none';
+  }});
 }}
 
 function renderChart() {{
@@ -533,6 +550,14 @@ function renderChart() {{
     o.value = c.key; o.textContent = c.label; sel.appendChild(o);
   }});
   sel.value = DATA.defaultMetric;
+  // Dataset filter: "All" + one option per dataset.
+  const dsf = document.getElementById('dsFilter');
+  const allOpt = document.createElement('option');
+  allOpt.value = '__all__'; allOpt.textContent = 'All datasets'; dsf.appendChild(allOpt);
+  (DATA.datasets || []).forEach(d => {{
+    const o = document.createElement('option');
+    o.value = d; o.textContent = d; dsf.appendChild(o);
+  }});
   document.getElementById('gen').textContent = 'Generated ' + new Date().toLocaleString();
 }})();
 </script>
