@@ -80,6 +80,9 @@ def get_model(
     elif "cohere" in model_lower and "transcribe" in model_lower:
         from .cohere_transcribe import CohereTranscribeEvaluator
         return CohereTranscribeEvaluator(model_name, language, batch_size)
+    elif "granite" in model_lower and "nar" in model_lower:
+        from .granite_nar import GraniteNarEvaluator
+        return GraniteNarEvaluator(model_name, language, batch_size)
     elif "granite" in model_lower:
         from .granite import GraniteEvaluator
         return GraniteEvaluator(model_name, language, batch_size)

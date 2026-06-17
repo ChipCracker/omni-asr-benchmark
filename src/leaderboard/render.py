@@ -315,6 +315,8 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
       <option value="best">best WER first</option>
     </select></label>
     <input id="detailFilter" class="filter" placeholder="filter hyp / GT text…" oninput="renderDetails()">
+    <label title="Show text exactly as it is compared for WER/CER (lowercased, punctuation removed)">
+      <input type="checkbox" id="detailNorm" onchange="renderDetails()"> normalized</label>
   </div>
   <div id="detailMeta"></div>
   <div id="detailList"></div>
@@ -337,6 +339,16 @@ let _detailRow = null;
 
 function esc(s) {{ const d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML; }}
 function escAttr(s) {{ return esc(s).replace(/"/g,'&quot;'); }}
+// Mirror of src/benchmark/metrics.py::normalize_text (lowercase, strip ASCII
+// punctuation, collapse whitespace) so the shown text matches the WER/CER.
+function isPunct(c) {{ return (c>=33&&c<=47)||(c>=58&&c<=64)||(c>=91&&c<=96)||(c>=123&&c<=126); }}
+function normalizeText(s) {{
+  if (!s) return '';
+  s = String(s).toLowerCase();
+  let out = '';
+  for (let i=0;i<s.length;i++) {{ if (!isPunct(s.charCodeAt(i))) out += s[i]; }}
+  return out.replace(/\s+/g,' ').trim();
+}}
 
 function openDetails(el) {{
   _detailRow = el.dataset.row;
@@ -385,6 +397,9 @@ function renderDetails() {{
   else if (sortMode === 'best') items.sort((a, b) => cmp(a, b, 1));
   else items.sort((a, b) => a.i - b.i);
 
+  const norm = document.getElementById('detailNorm').checked;
+  const disp = (t) => norm ? normalizeText(t || '') : (t || '');
+
   let shown = 0, html = '';
   for (const it of items) {{
     const g = gt[String(it.i)] || {{refs: {{}}}};
@@ -402,11 +417,11 @@ function renderDetails() {{
                + (m[1] == null ? '' : ' · CER ' + (m[1]*100).toFixed(1) + '%');
       refsHtml += `<div class="utt-ref"><span class="lbl">${{esc(REF_LABELS[r]||r.toUpperCase())}}</span>`
                 + `<span class="wercer" style="${{refColor(m[0])}}">${{wc}}</span>`
-                + `<span class="gt">${{esc((g.refs && g.refs[r]) || '')}}</span></div>`;
+                + `<span class="gt">${{esc(disp((g.refs && g.refs[r]) || ''))}}</span></div>`;
     }}
     const head = `#${{it.i}}` + (g.spk ? ` · spk ${{esc(g.spk)}}` : '') + (g.dur ? ` · ${{g.dur}}s` : '');
     html += `<div class="utt"><div class="utt-head">${{head}}</div>`
-          + `<div class="utt-hyp"><span class="lbl">HYP</span> <span class="gt">${{esc(it.hyp)}}</span></div>`
+          + `<div class="utt-hyp"><span class="lbl">HYP</span> <span class="gt">${{esc(disp(it.hyp))}}</span></div>`
           + refsHtml + `</div>`;
   }}
   document.getElementById('detailMeta').textContent = shown + ' / ' + items.length + ' utterances';

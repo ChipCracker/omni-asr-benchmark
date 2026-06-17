@@ -39,5 +39,7 @@ models:
     batch_size: 1
   - name: ibm-granite/granite-speech-4.1-2b
     batch_size: 1
+  - name: ibm-granite/granite-speech-4.1-2b-nar
+    batch_size: 1
   # - name: syllabic-asr-ctc
   #   extra_args: "--model-dir ${SYLLABIC_ASR_MODEL_DIR}"
