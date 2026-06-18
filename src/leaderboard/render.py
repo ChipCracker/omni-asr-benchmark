@@ -246,7 +246,9 @@ def render_html(lb: Leaderboard, show_rtfx: bool = True) -> str:
   * {{ box-sizing: border-box; }}
   body {{ font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
           margin: 0; padding: 2.5rem 1.5rem; background: radial-gradient(1200px 600px at 50% -10%, #ffffff, var(--bg)); color: var(--text); }}
-  .wrap {{ max-width: 1100px; margin: 0 auto; }}
+  .wrap {{ max-width: min(1800px, 96vw); margin: 0 auto; }}
+  #tableView {{ overflow-x: auto; }}        /* wide multi-dataset table scrolls horizontally */
+  thead th, tbody td {{ white-space: nowrap; }}
   header h1 {{ font-size: 1.5rem; margin: 0 0 .25rem; letter-spacing: -0.01em; }}
   header p.sub {{ margin: 0 0 1.1rem; color: var(--muted); font-size: .9rem; }}
   .corpus {{ display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom: 1.4rem; }}
@@ -450,7 +452,11 @@ function renderDetails() {{
       if (!hay.includes(q)) continue;
     }}
     shown++;
-    const refs = REF_ORDER.filter(r => (g.refs && g.refs[r] != null) || (it.m && it.m[r]));
+    // Reference order: known refs first, then any others present (e.g. ksof "ref").
+    const known = new Set(REF_ORDER);
+    const order = [...REF_ORDER];
+    [g.refs, it.m].forEach(o => {{ if (o) Object.keys(o).forEach(r => {{ if (!known.has(r)) {{ known.add(r); order.push(r); }} }}); }});
+    const refs = order.filter(r => (g.refs && g.refs[r] != null) || (it.m && it.m[r]));
     let refsHtml = '';
     for (const r of refs) {{
       const m = (it.m && it.m[r]) || [null, null];
