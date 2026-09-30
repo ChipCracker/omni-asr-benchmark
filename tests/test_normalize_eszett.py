@@ -1,4 +1,4 @@
-"""ß/ss folding in the scoring normalisation and the result re-scoring tool."""
+"""ß/ss folding and Unicode punctuation in the scoring normalisation; result re-scoring."""
 
 import copy
 import importlib.util
@@ -23,6 +23,17 @@ def test_eszett_folds_to_ss_on_both_cases():
     assert normalize_text("Daß er muß") == "dass er muss"
     assert normalize_text("ein bißchen") == "ein bisschen"
     assert normalize_text("GROẞE Straße") == "grosse strasse"
+
+
+def test_unicode_punctuation_is_removed():
+    assert normalize_text("„Das wird ein Fehler“ – sagte er…") == "das wird ein fehler sagte er"
+    assert normalize_text("geht’s, geht´s, gehtʼs, geht's") == "gehts gehts gehts gehts"
+    assert normalize_text("E–Mail und E-Mail") == "email und email"
+    assert normalize_text("«Ja» ‚nein‘ — gut， fertig。") == "ja nein gut fertig"
+    # deleted, not replaced by a space -- exactly like ASCII punctuation
+    assert normalize_text("gut，fertig") == normalize_text("gut,fertig") == "gutfertig"
+    m = compute_single_sample_metrics("Das wird ein Fehler", "„Das wird ein Fehler“ –")
+    assert m["wer"] == 0.0
 
 
 def test_rest_of_the_normalisation_is_unchanged():

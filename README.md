@@ -54,8 +54,12 @@ SLURM parameters live in `slurm/kiz0.env` (partition `p1,p2,p6`, `--gres=gpu:1`,
 ### Scoring normalisation
 
 WER/CER are computed on normalised text (`src/benchmark/metrics.py::normalize_text`),
-identically for reference and hypothesis: lower-case, **ß → ss**, ASCII punctuation
-removed, whitespace collapsed. The ß/ss folding (since 2026-09-30) keeps the pre-1996
+identically for reference and hypothesis: lower-case, **ß → ss**, punctuation deleted
+(ASCII `string.punctuation` plus every Unicode punctuation character, category P*, e.g.
+„ “ ’ – … ，, and the apostrophe look-alikes ´ ʼ; deleted, not replaced by a space, so
+"E–Mail" and "E-Mail" both become "email"), whitespace collapsed. The Unicode rule matters
+for Common Voice references and some model outputs (NSCC: 63 references with typographic
+apostrophes, changes below 0.01 WER points). The ß/ss folding (since 2026-09-30) keeps the pre-1996
 spelling of BAS-RVG1-ORT ("daß", "muß", "bißchen") from counting as errors against
 modern output ("dass", "muss", "bisschen"); it lowered RVG1-ORT WER by 1.2 to 1.4 points
 for nearly every model. After any change to the normalisation, re-score the stored results

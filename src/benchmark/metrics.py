@@ -6,9 +6,22 @@ engine and the (legacy) evaluation package share one implementation.
 
 import re
 import string
+import sys
+import unicodedata
 from typing import Dict, List, Any
 
 from jiwer import wer, cer, process_words
+
+# Characters deleted by normalize_text: ASCII string.punctuation (incl. the symbols
+# $ + < = > ^ ` | ~, as before), every Unicode punctuation character (category P*:
+# typographic quotes „ “ ‚ ‘ ’ « », dashes – — ‑, …, fullwidth ，。 etc.) and two
+# apostrophe look-alikes outside P* (´ U+00B4 ACUTE ACCENT, ʼ U+02BC MODIFIER LETTER
+# APOSTROPHE). Deleted, not replaced by a space -- like ASCII "-" ("E-Mail" -> "email").
+_PUNCT_DELETE = dict.fromkeys(
+    [ord(c) for c in string.punctuation]
+    + [cp for cp in range(sys.maxunicode + 1) if unicodedata.category(chr(cp)).startswith("P")]
+    + [0x00B4, 0x02BC]
+)
 
 
 def normalize_text(text: str) -> str:
@@ -16,19 +29,22 @@ def normalize_text(text: str) -> str:
 
     - Lowercase
     - ß -> ss (after lowercasing, so a capital ẞ is covered too)
-    - Remove punctuation
+    - Remove punctuation: ASCII and all Unicode punctuation (see ``_PUNCT_DELETE``)
     - Normalize whitespace
 
     ß/ss: BAS-RVG1-ORT is transcribed in the pre-1996 spelling ("daß", "muß",
     "bißchen"), current models write "dass", "muss", "bisschen". The spelling
     reform is not a recognition error, so both sides are folded to "ss".
+    Unicode punctuation: Common Voice sentences and some model outputs carry
+    typographic quotes, dashes and apostrophes ("geht’s") that ASCII
+    string.punctuation left in place as word parts or stray tokens.
     """
     if not text:
         return ""
 
     text = text.lower()
     text = text.replace("ß", "ss")
-    text = text.translate(str.maketrans("", "", string.punctuation))
+    text = text.translate(_PUNCT_DELETE)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
