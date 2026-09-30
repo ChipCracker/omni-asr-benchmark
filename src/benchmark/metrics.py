@@ -15,13 +15,19 @@ def normalize_text(text: str) -> str:
     """Normalize text for ASR evaluation.
 
     - Lowercase
+    - ß -> ss (after lowercasing, so a capital ẞ is covered too)
     - Remove punctuation
     - Normalize whitespace
+
+    ß/ss: BAS-RVG1-ORT is transcribed in the pre-1996 spelling ("daß", "muß",
+    "bißchen"), current models write "dass", "muss", "bisschen". The spelling
+    reform is not a recognition error, so both sides are folded to "ss".
     """
     if not text:
         return ""
 
     text = text.lower()
+    text = text.replace("ß", "ss")
     text = text.translate(str.maketrans("", "", string.punctuation))
     text = re.sub(r"\s+", " ", text)
     return text.strip()

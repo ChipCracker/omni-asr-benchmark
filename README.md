@@ -51,6 +51,22 @@ SLURM parameters live in `slurm/kiz0.env` (partition `p1,p2,p6`, `--gres=gpu:1`,
 - **Dataset:** subclass `DatasetSource`, yield `Sample`s with a `references` dict, and
   register it in `src/datasets/registry.py`.
 
+### Scoring normalisation
+
+WER/CER are computed on normalised text (`src/benchmark/metrics.py::normalize_text`),
+identically for reference and hypothesis: lower-case, **ß → ss**, ASCII punctuation
+removed, whitespace collapsed. The ß/ss folding (since 2026-09-30) keeps the pre-1996
+spelling of BAS-RVG1-ORT ("daß", "muß", "bißchen") from counting as errors against
+modern output ("dass", "muss", "bisschen"); it lowered RVG1-ORT WER by 1.2 to 1.4 points
+for nearly every model. After any change to the normalisation, re-score the stored results
+instead of re-running models:
+
+```bash
+python scripts/rescore_results.py --check   # report deltas only
+python scripts/rescore_results.py           # rewrite results/, results/speed/, results/failed_evidence/
+python scripts/leaderboard.py --export html,md
+```
+
 ## Supported Models
 
 - **OmniASR-LLM** (default) - Facebook's omnilingual LLM-based ASR (e.g., `omniASR_LLM_Unlimited_7B_v2`, `omniASR_LLM_300M`)
