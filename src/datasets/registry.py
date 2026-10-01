@@ -10,6 +10,12 @@ from typing import Callable, Dict
 
 from .base import DatasetSource
 from .bas_rvg1 import BasRvg1Source
+from .de_testsets import (
+    CvDeTestSource,
+    TudaTestKinectRawSource,
+    TudaTestYamahaSource,
+    VerbmobilTestSource,
+)
 from .manifest import KsofSource, ManifestSource
 
 # Both the canonical ``name`` and the class name resolve to the same factory,
@@ -21,6 +27,14 @@ _DATASETS: Dict[str, Callable[..., DatasetSource]] = {
     "ksofsource": KsofSource,
     "manifest": ManifestSource,
     "manifestsource": ManifestSource,
+    "tuda_test_kinect_raw": TudaTestKinectRawSource,
+    "tudatestkinectrawsource": TudaTestKinectRawSource,
+    "tuda_test_yamaha": TudaTestYamahaSource,
+    "tudatestyamahasource": TudaTestYamahaSource,
+    "cv_de_test": CvDeTestSource,
+    "cvdetestsource": CvDeTestSource,
+    "verbmobil_test": VerbmobilTestSource,
+    "verbmobiltestsource": VerbmobilTestSource,
 }
 
 

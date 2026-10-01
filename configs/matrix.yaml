@@ -19,6 +19,15 @@ datasets:
       channel: c
   - name: ksof
     # NeMo-style manifest; KsofSource.DEFAULT_MANIFEST = manifests/ksof-manifest.jsonl
+  # German public test sets (src/datasets/de_testsets.py; manifests built by
+  # scripts/build_de_test_manifests.py): Tuda-De v4 test split, the same 1021
+  # recordings through a far-field and a close-talk microphone; Common Voice
+  # German test split; Verbmobil BAS TEST set (ORT reference).
+  # kiz0 run: slurm/de_testsets_bench.sbatch.
+  - name: tuda_test_kinect_raw
+  - name: tuda_test_yamaha
+  - name: cv_de_test
+  - name: verbmobil_test
 
 models:
   - name: openai/whisper-large-v3
