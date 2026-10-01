@@ -89,6 +89,36 @@ python scripts/leaderboard.py --export html,md
 - **Cohere Transcribe** - Cohere's Conformer-based ASR model (e.g., `CohereLabs/cohere-transcribe-03-2026`, 2B params, 14 languages)
 - **NeMo STT Conformer** - NVIDIA NeMo Conformer CTC/RNNT models (e.g., `nvidia/stt_de_conformer_ctc_large`, 120M params, German)
 
+## German public test sets
+
+`src/datasets/de_testsets.py` serves four bundled NeMo manifests
+(`manifests/<name>.jsonl`, audio as 16 kHz mono WAV on kiz0, absolute paths).
+`scripts/build_de_test_manifests.py` builds them and writes a
+`manifests/<name>_report.json` with the counts and every dropped clip.
+
+| Dataset | Source | Clips / hours | Reference |
+|---|---|---|---|
+| `tuda_test_kinect_raw` | Tuda-De v4 (`german-speechdata-package-v4`), test split, far-field Kinect, raw channel | 1 021 / 2.38 h | `ref` = `cleaned_sentence` (case kept, numbers spelled out) |
+| `tuda_test_yamaha` | the same 1 021 recordings, close-talk Yamaha microphone | 1 021 / 2.38 h | `ref` |
+| `cv_de_test` | Common Voice Scripted Speech 26.0 German (Mozilla Data Collective), complete official test split | 16 208 / 27.96 h | `ref` = `sentence` |
+| `verbmobil_test` | Verbmobil German (BAS), the speaker-disjoint TEST set of "Infos to VM Data Sets" v2.3 (VM1_TEST from VM14.1 + VM2_TEST), one clip per speaker turn, close-talk | 1 221 / 2.54 h | `ort` = ORT tier, cleaned like BAS-RVG1 ORT |
+
+- Tuda drops 6 of the 1 027 test recordings for both microphones: 3 have no
+  Kinect file, 3 an empty one. Both Tuda datasets therefore differ only in the
+  microphone.
+- Verbmobil drops 2 of the 1 223 listed turns whose ORT tier holds only
+  hesitation/noise markers.
+- Manifest rows carry `labels` that the leaderboard shows as sub-splits: Tuda
+  text source, gender and "sentence in SelOSS training data" (leak audit of the
+  SelOSS training stores), CV "sentence in CV train" (exact match against the
+  CV 26.0 train split, 84 of 16 208), Verbmobil part (VM1/VM2).
+
+```bash
+# kiz0: all models with a full leaderboard row on one or more of the sets
+DATASETS=tuda_test_kinect_raw,tuda_test_yamaha sbatch slurm/de_testsets_bench.sbatch
+DATASETS=cv_de_test ROWLIST="5 6 7" sbatch --array=0 --time=03:00:00 slurm/de_testsets_bench.sbatch
+```
+
 ## Installation
 
 ```bash

@@ -1,0 +1,37 @@
+{
+ "corpus": "Verbmobil German (BAS), set TEST of 'Infos to VM Data Sets' v2.3",
+ "root": "/nfs/data/Verbmobil",
+ "sets_dir": "/nfs/data/Verbmobil/VM1/doc/doc/SETS",
+ "reference": "ORT tier, BAS-RVG1 ORT cleaning",
+ "clips": 1221,
+ "hours": 2.5414,
+ "words": 23685,
+ "speakers": 45,
+ "dialogs": 126,
+ "duration_s": {
+  "mean": 7.49,
+  "min": 0.21,
+  "max": 63.3,
+  "over_30s": 17
+ },
+ "parts": {
+  "VM1": {
+   "listed": 631,
+   "kept": 631,
+   "hours": 1.5203,
+   "words": 14267,
+   "speakers": 32
+  },
+  "VM2": {
+   "listed": 592,
+   "kept": 590,
+   "hours": 1.0211,
+   "words": 9418,
+   "speakers": 13
+  }
+ },
+ "dropped": {
+  "g424acn1_005_AMA": "empty ORT after cleaning",
+  "g276acn1_006_AIV": "empty ORT after cleaning"
+ }
+}

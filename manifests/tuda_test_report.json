@@ -1,0 +1,64 @@
+{
+ "corpus": "Tuda-De (german-speechdata-package-v4), split test",
+ "root": "/nfs1/scratch/staff/witzlch/tuda-bench/raw_v4",
+ "text_field": "cleaned_sentence",
+ "mics": [
+  "Kinect-RAW",
+  "Yamaha"
+ ],
+ "recordings_in_split": 1027,
+ "recordings_kept": 1021,
+ "recordings_dropped": 6,
+ "drop_reasons": {
+  "2015-01-27-14-37-33": "Kinect-RAW: 0.00 s < 1.0 s",
+  "2015-01-27-14-39-29": "Kinect-RAW: missing",
+  "2015-01-27-14-42-24": "Kinect-RAW: missing",
+  "2015-02-04-12-36-32": "Kinect-RAW: 0.00 s < 1.0 s",
+  "2015-02-10-13-51-15": "Kinect-RAW: missing",
+  "2015-02-10-14-18-26": "Kinect-RAW: 0.00 s < 1.0 s"
+ },
+ "filters": {
+  "min_duration_s": 1.0,
+  "min_peak": 0.0001
+ },
+ "wavs_per_mic_in_split": {
+  "Kinect-Beam": 1024,
+  "Kinect-RAW": 1024,
+  "Realtek": 1024,
+  "Samson": 1024,
+  "Yamaha": 1024
+ },
+ "train_sentences": 958,
+ "kept_sentence_in_train": 1,
+ "audit_ids": "/nfs1/scratch/staff/witzlch/cv-bench/meta/tuda_test_drop_utts.txt",
+ "audit_label": "sentence in SelOSS training data",
+ "kept_on_audit_list": 45,
+ "datasets": {
+  "tuda_test_kinect_raw": {
+   "mic": "Kinect-RAW",
+   "clips": 1021,
+   "hours": 2.3831,
+   "words": 17333,
+   "duration_s": {
+    "mean": 8.4,
+    "min": 2.55,
+    "max": 33.08,
+    "over_30s": 4
+   },
+   "converted_to_16k_mono": 0
+  },
+  "tuda_test_yamaha": {
+   "mic": "Yamaha",
+   "clips": 1021,
+   "hours": 2.3848,
+   "words": 17333,
+   "duration_s": {
+    "mean": 8.41,
+    "min": 2.56,
+    "max": 33.09,
+    "over_30s": 4
+   },
+   "converted_to_16k_mono": 0
+  }
+ }
+}

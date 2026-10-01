@@ -1,0 +1,18 @@
+{
+ "corpus": "Common Voice German cv26, split test",
+ "release": "Common Voice Scripted Speech 26.0 German (Mozilla Data Collective)",
+ "input": "/nfs1/scratch/staff/witzlch/cv-bench/src/cv26_de_test/*.parquet",
+ "text_field": "sentence",
+ "rows_in_split": 16208,
+ "clips": 16208,
+ "failed": {},
+ "hours": 27.957,
+ "words": 148704,
+ "duration_s": {
+  "mean": 6.21,
+  "min": 1.32,
+  "max": 15.44
+ },
+ "train_sentences": 622820,
+ "sentence_in_train": 84
+}
