@@ -12,6 +12,8 @@ from .base import DatasetSource
 from .bas_rvg1 import BasRvg1Source
 from .de_testsets import (
     CvDeTestSource,
+    KielReadSource,
+    KielSponSource,
     TudaTestKinectRawSource,
     TudaTestYamahaSource,
     VerbmobilTestSource,
@@ -35,6 +37,10 @@ _DATASETS: Dict[str, Callable[..., DatasetSource]] = {
     "cvdetestsource": CvDeTestSource,
     "verbmobil_test": VerbmobilTestSource,
     "verbmobiltestsource": VerbmobilTestSource,
+    "kiel_read": KielReadSource,
+    "kielreadsource": KielReadSource,
+    "kiel_spon": KielSponSource,
+    "kielsponsource": KielSponSource,
 }
 
 

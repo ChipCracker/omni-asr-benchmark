@@ -4,6 +4,8 @@ from .base import DatasetSource, Sample
 from .bas_rvg1 import BasRvg1Source
 from .de_testsets import (
     CvDeTestSource,
+    KielReadSource,
+    KielSponSource,
     TudaTestKinectRawSource,
     TudaTestYamahaSource,
     VerbmobilTestSource,
@@ -21,6 +23,8 @@ __all__ = [
     "TudaTestYamahaSource",
     "CvDeTestSource",
     "VerbmobilTestSource",
+    "KielReadSource",
+    "KielSponSource",
     "get_dataset",
     "available_datasets",
 ]

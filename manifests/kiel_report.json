@@ -1,0 +1,50 @@
+{
+ "corpus": "The Kiel Corpus of Read/Spontaneous Speech (IPDS Kiel), via kiel_ml",
+ "audio_root": "/nfs1/scratch/staff/witzlch/kiel-bench/Kiel_Corpus",
+ "source_jsonl": "/Users/christopherwitzl/Documents/Entwicklung/kiel-corpus/kiel_corpus_parquet/kiel_corpus.jsonl",
+ "missing_audio": 0,
+ "dropped_empty_or_short": {
+  "kiel_spon": 12
+ },
+ "min_duration": 0.3,
+ "datasets": {
+  "kiel_read": {
+   "manifest": "/Users/christopherwitzl/Documents/Entwicklung/omni-asr-test/manifests/kiel_read.jsonl",
+   "clips": 5227,
+   "hours": 5.689,
+   "words": 40944,
+   "speakers": 53,
+   "realized_phones": 3876,
+   "subcorpora": {
+    "PhonDat90": 4227,
+    "PhonDat92": 1000
+   },
+   "duration_s": {
+    "mean": 3.92,
+    "min": 1.28,
+    "max": 41.79,
+    "over_30s": 23
+   }
+  },
+  "kiel_spon": {
+   "manifest": "/Users/christopherwitzl/Documents/Entwicklung/omni-asr-test/manifests/kiel_spon.jsonl",
+   "clips": 3609,
+   "hours": 9.998,
+   "words": 84177,
+   "speakers": 64,
+   "realized_phones": 2458,
+   "subcorpora": {
+    "VMaddOrt": 1151,
+    "VMaddSeg": 270,
+    "VerbMobil": 1852,
+    "VideoTask": 336
+   },
+   "duration_s": {
+    "mean": 9.97,
+    "min": 0.3,
+    "max": 74.24,
+    "over_30s": 135
+   }
+  }
+ }
+}

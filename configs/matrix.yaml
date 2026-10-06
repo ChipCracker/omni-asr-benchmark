@@ -28,6 +28,12 @@ datasets:
   - name: tuda_test_yamaha
   - name: cv_de_test
   - name: verbmobil_test
+  # Kiel Corpus (IPDS Kiel), whole corpus split by style (src/datasets/de_testsets.py;
+  # manifests built by scripts/build_kiel_manifests.py from the kiel_ml JSONL, audio under
+  # /nfs1/scratch/staff/witzlch/kiel-bench on kiz0). kiz0 run:
+  #   DATASETS=kiel_read,kiel_spon sbatch slurm/de_testsets_bench.sbatch
+  - name: kiel_read
+  - name: kiel_spon
 
 models:
   - name: openai/whisper-large-v3

@@ -1,8 +1,8 @@
-"""German public test sets as bundled NeMo manifests: Tuda-De, Common Voice, Verbmobil.
+"""German public test sets as bundled NeMo manifests: Tuda-De, Common Voice, Verbmobil, Kiel.
 
-Four leaderboard datasets, each a fixed JSONL manifest under ``manifests/``
-built by ``scripts/build_de_test_manifests.py`` (audio as 16 kHz mono WAV on
-kiz0, paths absolute):
+Six leaderboard datasets, each a fixed JSONL manifest under ``manifests/``
+built by ``scripts/build_de_test_manifests.py`` / ``scripts/build_kiel_manifests.py``
+(audio as 16 kHz mono WAV on kiz0, paths absolute):
 
 * ``tuda_test_kinect_raw`` -- Tuda-De v4 test split, far-field Kinect microphone
   (raw channel, speaker ~1-2 m away). Reference ``ref``: ``cleaned_sentence`` of
@@ -13,6 +13,12 @@ kiz0, paths absolute):
 * ``cv_de_test`` -- Common Voice German, the complete official ``test`` split of
   the release named in the manifest (``cv_version``). Reference ``ref``:
   ``sentence`` (case and punctuation kept; the scorer normalises both away).
+* ``kiel_read`` / ``kiel_spon`` -- the Kiel Corpus of Read/Spontaneous Speech
+  (IPDS Kiel), whole corpus split by style, built by
+  ``scripts/build_kiel_manifests.py`` from the ``kiel_ml`` JSONL. Reference
+  ``text``: Kiel orthography with the annotation markers removed. The rows carry
+  ``realized: yes`` where hand-segmented realised phones exist (phone-level
+  scoring of a phoneme head, see oscillator-asr-resonant docs).
 * ``verbmobil_test`` -- Verbmobil German spontaneous appointment/travel
   dialogues, the BAS-defined speaker-disjoint TEST set (VM1_TEST + VM2_TEST,
   "Infos to VM Data Sets" v2.3), one clip per speaker turn, close-talk
@@ -83,7 +89,24 @@ class VerbmobilTestSource(BundledManifestSource):
     reference_key = "ort"
 
 
-SOURCES = (TudaTestKinectRawSource, TudaTestYamahaSource, CvDeTestSource, VerbmobilTestSource)
+class KielReadSource(BundledManifestSource):
+    """Kiel Corpus, read part (KCRead: PhonDat90/92), whole corpus, one clip per sentence/text."""
+
+    name = "kiel_read"
+    manifest_file = "kiel_read.jsonl"
+    reference_key = "text"
+
+
+class KielSponSource(BundledManifestSource):
+    """Kiel Corpus, spontaneous part (KCSpon: Verbmobil-Kiel, VMadd*, VideoTask), one clip per turn."""
+
+    name = "kiel_spon"
+    manifest_file = "kiel_spon.jsonl"
+    reference_key = "text"
+
+
+SOURCES = (TudaTestKinectRawSource, TudaTestYamahaSource, CvDeTestSource, VerbmobilTestSource,
+           KielReadSource, KielSponSource)
 
 
 @lru_cache(maxsize=None)
