@@ -27,3 +27,4 @@ PyYAML>=6.0           # configs/matrix.yaml
 # Long audio (>30s) is chunked with Silero VAD.
 # pip install -U transformers torch torchaudio silero-vad
 # silero-vad>=5.1
+num2words>=0.5.14

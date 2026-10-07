@@ -12,6 +12,9 @@ from typing import Dict, List, Any
 
 from jiwer import wer, cer, process_words
 
+from .number_norm import spell_digits_de, spell_numbers_de
+
+
 # Characters deleted by normalize_text: ASCII string.punctuation (incl. the symbols
 # $ + < = > ^ ` | ~, as before), every Unicode punctuation character (category P*:
 # typographic quotes „ “ ‚ ‘ ’ « », dashes – — ‑, …, fullwidth ，。 etc.) and two
@@ -25,13 +28,23 @@ _PUNCT_DELETE = dict.fromkeys(
 
 
 def normalize_text(text: str) -> str:
-    """Normalize text for ASR evaluation.
+    """Normalize text for ASR evaluation (the "standard" track).
 
     - Lowercase
-    - ß -> ss (after lowercasing, so a capital ẞ is covered too)
+    - Numbers -> German words on both sides (``number_norm.spell_numbers_de``: times,
+      dates, ordinals, decimals, ranges, percent/euro, years, plain integers), BEFORE
+      the punctuation is stripped because the dot/colon/comma of a number carry meaning;
+      a second pass (``spell_digits_de``) catches integers that only became standalone
+      after the stripping ("er kam 1.")
+    - ß -> ss (after lowercasing and after the number words, which num2words writes with ß)
     - Remove punctuation: ASCII and all Unicode punctuation (see ``_PUNCT_DELETE``)
     - Normalize whitespace
 
+    Numbers (2026-10-08): the references spell numbers out (BAS ORT, Kiel, Tuda) or keep
+    digits (Common Voice), and models differ the same way (SelOSS v4 and Whisper write
+    "18 Uhr", Qwen "achtzehn Uhr"). Neither is a recognition error, so both sides are
+    canonicalised to the spoken form. The "raw" track (``normalize_text_raw``) keeps the
+    digits as they are, i.e. the scoring used until 2026-10-07.
     ß/ss: BAS-RVG1-ORT is transcribed in the pre-1996 spelling ("daß", "muß",
     "bißchen"), current models write "dass", "muss", "bisschen". The spelling
     reform is not a recognition error, so both sides are folded to "ss".
@@ -43,10 +56,33 @@ def normalize_text(text: str) -> str:
         return ""
 
     text = text.lower()
+    text = spell_numbers_de(text)
+    text = text.translate(_PUNCT_DELETE)
+    text = spell_digits_de(text)
+    text = text.replace("ß", "ss")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def normalize_text_raw(text: str) -> str:
+    """``normalize_text`` without the number canonicalisation (digits stay digits): the
+    scoring of the leaderboard before 2026-10-08, kept as the "raw" track."""
+    if not text:
+        return ""
+
+    text = text.lower()
     text = text.replace("ß", "ss")
     text = text.translate(_PUNCT_DELETE)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
+
+
+def normalize_text_numbers(text: str) -> str:
+    """Alias of :func:`normalize_text` (numbers are canonical in the standard track now)."""
+    return normalize_text(text)
+
+
+NORMALIZERS = {"std": normalize_text, "raw": normalize_text_raw}
 
 
 def compute_asr_metrics(
