@@ -1,0 +1,422 @@
+# mod9 clips whose reference is predominantly English: excluded from the leaderboard (2026-10-08)
+# rule: en/(en+de) stop words >= 0.5 and >= 3 English stop words; 419 of 17398 clips, 17504 words, 2.29 h
+# utt_id	ratio	reference (start)
+00258f67da1e142a8eaac0d57e7bd429	0.89	there's another choice there's this one right here which leaves at 858 and arriv
+003fe846895c3e017a9b2d5d2a7c4444	0.67	wie findest du singen ich finde singen sehr schlecht so those are your options t
+0066a648c665cc17910352d82c0a8bb7	0.86	or the major train station so you'll find a hauptbahnhof in your major cities an
+01544f7b5e1d3236592dc4d5b648959f	0.95	go to the museums and go visit all of the bakeries you can possibly find so let'
+018ae250560d23a57290561954e8c755	0.84	i'll make that clear they do have malls but they're not as common as they are he
+021d656637c292b58124db0afca752ce	0.97	little cafés will be along here and they'll put chairs and tables out so the rat
+03075cf9d253130fa6949bb15640e95a	0.76	with his little garden because he grew also tomatoes and he says he has always t
+032de538b7154fcfa80901e18489359e	0.92	mein ehemann heißt john meine kinder heißen sophie claire und emily you're maybe
+03e61c22b9b0d0112b37fe1064e9ddac	0.90	it's such an organized and easy and efficient way to travel and you really can s
+0438bf9e362f70b39e358e4556784b3a	0.78	that's great thank you so i have shown you 3 stories overall yeah first of all w
+0454c1010f5a002b0e315f97b6dcddc7	0.74	ich brauche einen fahrplan i need a travel schedule if you buy your train ticket
+04df5289eccb5e309a2dd5413102f3bb	0.75	that takes a lot more power and a lot more time this even tells you what kind of
+058871125797fb584f6735d2932b6ad8	0.82	so that's pretty good and you've got two prices here the sparangebote it's the s
+0594c31366387c36edda3861c9555ef3	1.00	for that day already and it looks like for this whole week here they have limite
+0645eb07989ae8e322fbc9e551b6c913	0.93	where they go for the seats by the windows so that they can look out oh and to g
+069d6f9306f6ff9ed999d4196287fa7f	0.92	you choose one of these seats a freier sitzplatz means that that seat has not be
+06e692cc893cd08402fcf4a2821e112b	0.81	they're nearly in every fruit in every vegetable i understand why but there shou
+07774d05a542f8e4fb7236ad609133d3	0.80	during the past decade conclusions we conclude there was a systematic breakdown 
+08a2f0fc7cc8982bd2c178ccdaf92625	0.82	okay der schlafwagen is the sleeping car and they have sleeping cars on train dr
+09ba1c4951c4e74b6cc5d37340b78048	0.71	which is important unless you wanna take a train ride and come out of that wagen
+0a08237c26dbb9412fd8bd864cdebcfa	0.76	ask wann hast du sport or when do you have pe you could answer ich habe am monta
+0a556839ef2f612c7aab6cd9d10bde9d	1.00	because 0848 means the wheels have already been rolling and now they're at full 
+0acd865456322fbedce4a454fc7796ee	0.95	i think that they have to learn hard they have to be creative and they have to b
+0c05eb8451cb42a158d32ab815826d0d	0.75	fünfundfünzig mathe by saying i have math at eight fiftyfive notice that word or
+0c42f98412b04e9921389a4d4907409f	0.87	meine mutter mutter being feminine so i have to add that e same with meine schwe
+0ce4f7d214d32e413c2d879ef50f1196	0.70	and then our rückflug is our return flight let's stay in germany for three weeks
+0dc1ca75414d1a90ad8ec3ee3f6b2a9f	0.69	here we have two people talking and in this instance we have a boy and a girl ta
+0de9e0303c2486fc74a9e7bddc49e877	0.88	different things like that and then we're eventually getting into payment inform
+0e83665844e6722ee82102ddbcc54f1f	0.71	ich laufe gern schlittschuh mehr freizeitaktivitäten here are some more freetime
+0edd5d5e7ef6c27649a4b2c644bb81c1	0.60	makes more understandable that the price is a little higher than other brands ok
+0ee0a9e9816ee37baa96a2ce1bdb5929	0.83	yeah i know what this means but i don't know what kind of techniques they are ok
+1039cf87dd17a9e3332138bd4482e768	0.93	look after this it should be yeah it should be common that the farmers get help 
+10a965d46195f1e52ed52e566059a288	0.63	so our group is going to take a trip to the german city of heidelberg for the we
+10f82757a7f3b1a85531c724814f2297	0.81	yeah i think so i think everyone can be a painter because we have different type
+114550cd0fb0f1d0b9668c0a4681c94d	0.85	private pools or community pools they'll have a pool in the big city where you c
+12a041eaac74528d333330abeef8a907	0.91	if we can save the soil more it's one step to become an healthier i think it's j
+12adae96c2fbf319e72b59cbc9fa8742	0.86	so this gives us our information one adult single room arriving on friday checki
+12e5df6f2ed57cd2719bdd6738e89ac5	0.93	and i think healthy food can taste better okay okay so you think it would taste 
+1440a89e56cc4616ebc083fe7fc7ff98	0.76	seine lieblingsmusik ist country his favorite music is country now you can add t
+153f096ce966fd452f75393e5a64d41e	0.94	when you are buying products like this do you ever think about the environmental
+15f4ae70017fd587aaa9d738f9ce6607	0.85	oh you get a map that's really cool so this helps you visualize you're going fro
+16154c28293bab201f3f06143ce099e0	0.73	golf but if you're just expressing you like to be active and athletic then you w
+17107ba7adbf84c46028a35f49b5fba2	0.85	all right so here once again you can see this is the marienkirche in munich mary
+177d99d81051cce95fd6099729985dc5	0.62	yeah i normally i am somebody i search for things that are healthy and natural s
+19c3f13f7b99e8aba9aa37f9966d9f4b	1.00	hi there hallo hallo how are you
+1a08590a9f4f1b0744b405928dc0a1fd	0.86	sports bars with tvs they're a place to go and play cards and just relax so it's
+1a750fe4851e1e2cdb3a466d91f57165	0.86	and so it's following kind of the old style heidelberg look let's take a look at
+1ab8a11bc8f933895f350f13c2b93642	0.70	ich arbeite gern and that would be i like to work ich arbeite gern and that's it
+1b7d5f4a832f596d916ace645657dc76	0.93	the actual product would be any different so do you think it would taste better 
+1bc443e2bf53119feacef6c1a312020f	0.88	now there's different types of züge you've got the ezug which is the express tra
+1c2f2e56b15958b3f91761cf5b1dd383	0.64	the other one with usd 881 this one is usd 570 let's take a look so we would lea
+1c44e0b230efbf4aa57b096ff8bb1aa9	0.81	so this is nach this is to the bahnhof where you wanna get off at and so you wou
+1ce3f4f70ef36e5797e650104f1badd4	0.83	okay this is our djh or youth hostel which stands for deutsche jugendherberge or
+1d0b452c946e69994428ea5cc5b8c837	0.58	which means that it takes the dative case in which case das changes to dem and y
+1d5efdab139f14a691b334f780a46cf6	0.75	if knorr really works this way and wants to help the environment by doing these 
+1df53787df053b7eb2c028025010458d	0.84	if you wanna plan a holiday if you already have an account with them you can log
+1e3fd67e93899b727d7b3db8d70101bd	0.84	einsteigen is to climb in and we learned that from the flughafen umsteigen is si
+1f1830524b0cca9e70c9d3fbaa3ef62e	0.83	a lot of times the people at the hotel counter can give you recommendations for 
+1f79381d0802569201f5de13e37708f4	0.80	so heißen goes with sie and sie in this instance it's formal is you review this 
+1fa169fb192be58f55c821621563ac07	0.83	if you're driving in the black it means that you're riding the train without a t
+20221af82e0e984e8a5e9cf4c3f3a820	0.89	you are going to get fed there ought to be a place where you can tell them if yo
+20a03400834f151ebc21762f4441ec17	0.93	that nestlé should buy them because they take this water and bring it to europe 
+21d09d8ce6c2eb260da8bee376dd5475	0.79	here is another picture of the church and you can see here what i'm talking abou
+21d5bd8f2015ec8b4bf036556725e468	0.57	classes is wie viele fächer hast du or how many classes do you have we could ans
+21d6eb9505f7494387d5f19ebecc81ca	0.72	and here you get a climate machine apparently you can adjust your air temperatur
+222d06e23f8ed7fa457790e61efd3f2f	0.71	diesen offiziellen bericht hochinteressant nur 500 seiten online ich zitiere str
+22e6f50d8ce0f9ba2302ba2df47b9b7d	0.87	that at the moment there are no pesticides that everything is fine but knorr loo
+2418ba7c13b56ac75a30958b80701dd7	0.88	aussteigen is to climb out so if you get out of the train you climb out and when
+2458c7bd21fa459a3c115d83d0cd36e6	0.94	product itself do you think it would be better in any way yeah yeah i would thin
+26a73bf0a01f742d3366e53ac6dd6db8	0.92	we don't wanna eat in the restaurant we wanna take a chance and maybe eat in the
+27201c88860fae86a50b254ac1fefcd1	0.74	die fahrkarte is your driving ticket your ticket to prove that it's okay for you
+27f43e250b70c0575e1eefb993c71c10	0.65	i'll just talk a little bit about essen in restaurants i know you've gotten a lo
+28db8789824f78058a110d8621c054ae	0.60	by saying ich habe am dienstag um ein uhr zwanzig kunst so i have art on tuesday
+2998ccf33eeccca3b9260c2e92aff4cf	0.85	more natural but i think they are more in the today and not in the future in the
+29feffee07015a11287f251899f88cad	0.80	and vegetables and so yeah ok ehm and why is that so important to you i don't wa
+2c9e138ab64c2eaa9f0ad7866538fdcb	0.73	and then we'll talk about the haltestelle a little bit haltestelle is your bus s
+2cb0e1ae3d65d1082437accaac6a67be	0.65	so here you have some squiggly streets but it's definitely in a round form and h
+2d1f1e6b7659da80ac916a7d709483c1	1.00	teach the farmers and look that the farmers have the same values that knorr has 
+2d942aff4f25061795b1b66ffe850c2d	0.86	and lunch it's gonna be awesome okay if the train is late you could get a late a
+2daaba2446679ad90e828b2ada9a467a	0.77	i don't know exactly i just guess but i think in bio prodructs products sorry th
+2eab0a9c5a577eb6aacf08d43b92011d	0.91	and they give us some options the first option we see is at 1020 in the morning 
+2f07285fe86ce98facd583cb473a4d2f	0.60	ich fahre gern rollerblades laufen is to run or to jog by itself for example ich
+301f92820ce3af0da84666225b340860	0.53	so she's going to ask wie heißen sie referring to the two boys and she's gonna a
+306b9a1d528c43f86c52cf55d0d2d1ab	0.94	so it's das schlafzimmer the bedroom okay but we've got this preposition in whic
+30e3895ac85d3387e5e188e96e992e25	0.86	we have wie heißen sie and notice it's lowercased and in this case it is they so
+312b52d0d66ee1cb639e41e8ab089f61	0.95	i'm not gonna fall for it i'm gonna choose this ticket right here i think let's 
+31d387f95d2c4f75606d0a26d3a14228	0.90	are going to require that you manipulate those articles that you learned and so 
+3271d78df22a57edb7baa039c49d4c2f	0.70	so die katze is the subject of the sentence it's not part of a preposition nothi
+327a9c97b1dce80aab52d094dd8fea26	0.91	and that's a general time from the east coast to the middle of europe when you a
+341b74f509958661192c962732f9c1cf	0.89	so he comes up and he says wie heißt ihr he's talking to two people in english w
+34447065027f6d123106063e9fb78e39	0.84	this one this picture here happens to be a media markt so it's like a best buy t
+355963e27ff579618332aad55ff2be85	0.69	i think the coolest thing about my job is i can be creative i can do whatever i 
+36f3049010cef6093849ba0d0230eb9f	1.00	so we want to fly to germany so we're gonna look for the picture of the airplane
+370d140454ef5e74fc87be66060474f1	0.78	and every town has a train station train travel is the most used public transpor
+3733eb2d9f134e717447c3a67c1f7f54	0.71	yeah i don't know it's complicated ok it is complicated ok maybe this will help 
+37773cf051a9255f8aea12987356ec1c	0.82	it's not geometrical at all well take a look at american cities american cities 
+37a91d747c54c26da0cc3e7e697603a5	0.75	which also includes plurals you must add an e to your possessive pronoun
+37c4fba06e55cecf3f38aef3bd46be3f	0.88	or a gyro and it's either lamb or chicken or turkey it turns around all day this
+37d829942592dc10e96ced84601178de	0.96	and it's definitely worth it to be able to just get up and eat at your hotel bef
+385b3d9a9843e387e06715ad75fed50e	0.94	one of the first things that you are going to need to learn to do is to use the 
+39c719fe9a8c730b0e572ad94029d0da	0.88	that you would take to book a flight and go visit germany notice that they have 
+3a1f46b0f87cf549a6a4a764907ae7d1	0.80	we can apply the time that we have learned to tell when our classes are by askin
+3c0f393c1da31eb7c8593196c209b775	0.88	there and back because usually those tickets are a little bit cheaper and they a
+3cd6a00fc6a3e6aacd188a41a82798e6	0.83	and i am talking to you from my flat in london i work for a global food company 
+3f1cd84ef0e68cf3cb4def5be2053581	0.91	hat dein vater ein schnurrbart so you get rid of the do or the does and you focu
+3fdfd7b9e023a911e5aac91add22feb4	1.00	let's choose this ticket right here this looks pretty good we're traveling secon
+3fee5b56df03e204046d228d287c78d6	0.88	their growing because they can't have too much sun and less is also not so good 
+40e48822aeb4610aecfb308c7abee449	1.00	and it's gonna take you eight hours to get to paris so you lie down on the schla
+41504309469424636fdb85b824e85864	0.86	but the predominant religions is christianity catholicism and protestant you can
+41c008bcb13c859a113c86243826232f	0.79	train travel is very very popular in germany here you have one of the ice the bu
+42702a7e8187087203b94f6257937615	1.00	on the way the brand looks and their values and that they want to have an equal 
+429ac309073e6b84799ca1941a7a50c1	1.00	okay so we chose that and we chose the 465
+42ef2bd5105290db246363b55f93f1ea	0.83	on gutenberg's printing press before that the bible was just in latin so your ev
+4311ac534cda1703032ef5246b4403b4	0.59	and seventh period we're talking about what we have when we can also list our sc
+433aeeff3395ed8f943335a7b7b0635a	0.50	ich reite gern ich jage gern ich zeichne gern that would be to draw ich zeichne 
+44497041d0b8758f7b859d662436cc8c	0.71	so they've got the whole hoteltravelticket package deal going on just like the a
+444c05cc7ea099bc1739498528b829a0	0.68	and und whenever you're writing so if you need to write to if you're writing to 
+453341ea790503d527da6dfc1c7abb9a	0.56	but sometimes i look ok yeah is this alright is this a production that isn't so 
+45c592964520443b6f28c2ccb3b9f5fc	0.86	and now we need to choose our second flight which is going to be from frankfurt 
+46cc6c32c6f626992a84e8f1f70dc69a	0.74	so obst und gemüseladen konditorei metzgerei und bäckerei germans shop at small 
+46ed4ec4c1bbf28e9adedda0bc5f79f6	0.67	and notice that is heißen now this is a scenario where a young person is talking
+47681c3946ae0d956b74716c797aa5a9	0.93	you can get flight insurance or travel insurance for 7893 through lufthansa let'
+47a3129bfa860b6a34645caf1d569b19	0.85	because nestlé buys the water in africa and yeah we all know of the situation in
+4841e1a82d270625272ac1396318c218	0.84	i have one more question so at the beginning you said that one of the things you
+49922c0251efd0abc699afd512d4654c	0.95	so let's say that you're in germany and you wanna buy a train ticket to go somew
+4ba5a68ace8dcdfe3952cdbc245d0ef0	0.80	sometimes you can buy them from a kiosk or an atm sort of machine and then other
+4cf08569f54235c952af594c024ec45c	0.91	how to book a ticket to fly to germany with lufthansa we'll click weiter one mor
+4db1437c27a43913697e7113411a1c84	0.95	if you want to take an extra one it is going to be 100 us dollars so you take on
+4dbd2058f6ed7aec4ef301949200f1b5	1.00	they are going to cover your trip they are going to cover any medical costs incl
+4dbf1b8b29153e10a39bcf1d29da73b0	0.89	that we want to reserve that's for a single room and we definitely want breakfas
+4f85564f8097e5d0c939696a655db9f0	0.60	mein name ist toni kronke auf meiner visitenkarte steht head of recruitment and 
+500588fef11be290a1e70b2793c57c00	1.00	people generally like to be in the middle that's the stablest part of the plane 
+5075870daab3ad3fda07126046eafd0a	0.91	so when you wanna buy a ticket you are gonna buy it from the deutsche bahn the g
+50f0d5f3723512007912cc87714e03fe	0.60	what is wand normally der die or das it's die wand so what does die change to in
+5189d85f7e709870b40844c230e2a6d4	0.75	of course i think that is a fantastic way to save the environment and to save th
+51c003732564d10cb93b36b2f428a59a	0.62	if you said er was he then you're correct so the answer would be er heißt for ex
+522d187da5e03fbfed50e5a307c7a597	0.77	and here's what they mean in english now if you're talking about an object that 
+5294e0804471f4033ce84f6f84abca89	0.93	and we're going for the weekend so what day do we want to leave on let's choose 
+52ae9fe9eeab5af7b88a14fb8903183b	0.88	different butcher stores walmart actually went to germany and walmart did not su
+52f402909a8f0e51c1e3afb463ba17b4	0.75	and it takes the accusative case der teller changes to den so we've got two accu
+5321b6aa6cb6ca5cba85a4e8f76ed546	0.90	but if you're talking to a human or if you don't have a fahrplan and you need so
+536241f42fdadda6faba9bcfb8837f1a	0.89	so you type in oh i see i got it ready for you so you type in a k and then if yo
+53cc96ab55789853bce96e0b08a6a626	0.55	ok can you tell me a little bit about yourself yeah my name is nathalie i live i
+5485b8999f40036ab338c64dc7bba448	0.89	pretty typical for international flight these days so we told it to go ahead and
+54ecede8e52e277ebe4b22d5ff3e5240	0.91	and we are doing all of these things on our knorr products so i now want to ask 
+56ae328d2c26cb2cf2f9f01400bf9690	0.86	your surburbs and then you'll have your industry area and that's where a lot of 
+573703ace2442fda107fee905506511a	0.76	we will talk about verb forms a little later but for now let's see what happens 
+5778aaa3b7adae4c94d4dfd08aa59168	0.83	so maybe you noticed that der bahnhof has hof at the end and the airport has flu
+57b3a12c1e72e1c43b7227e9bff3fad6	1.00	one adult and their children and their babies this tells you the price for your 
+57f94412c29bfdb47a0944a75b4d63ea	0.53	location inside the bedroom so the das changes to dem it's in the accusative cas
+58ea663694202a65eb1fd1ca9063e056	0.87	hafen hof and so flug goes in front for the airport because that's flying and ba
+59488504fe4a5264d7e5acb638185f93	0.86	are healthier and we believe they taste sweeter so we believe saving water is no
+59a14678bfabb27a945c288fd690e2de	0.79	which will be more comfortable than a commuter plane this gives you some informa
+5a258bec3b5509c9c1bda5e0539133b0	0.85	that's normal but not so often and that we should look after the things that we 
+5aa0e5d36f5e057bb2cac25df3a5fd14	0.92	we've got three options that leave nothing's leaving at 8 o'clock most everythin
+5abed654d6f9458bb7ad3c13cd8b9df8	0.76	all sorts of different places diskothek kneipe und café all right let's talk abo
+5b0920770e20c4d53e7b7634d23d2ccb	0.85	sieben seventh period in der achten stunde acht eight period so you could answer
+5c98d04b2905c366c5cd2924aae253af	0.88	if we wanna check out the hotel we can read out the hotel we can look at rooms a
+5dc2be3e3430834cc468f4cb0d1d00ce	0.88	for economy class look how much the price jumps from economy class to the next s
+5dc6e4ee8ee687d46b1e39085a1270ed	0.82	if you want to specialize your travel arrangements then you can do that but if y
+5f231582b9ee9d01331178a7089e46e7	0.81	and how it make you feel about buying products from that brand it would sound ni
+5f3b80293f571b9b14fdd75e0d3bcda8	0.87	sometimes you are in a room with strangers normally it's divided by gender so if
+5fdd31ecfdb210de226ed9bc7514d18f	0.94	antikörper antibodies i don't know the english word for that but you feel you fe
+60962d0e3269ef0698c60462885148d2	0.83	or somebody who might be an acquaintance of somebody else that you know you are 
+618c1efd5ecdc82f4c004e65e8426e76	0.90	so this is your reiseplan this is your travel plan with the times and the places
+6190dd1bc92eea1bd8bf02800cdcf894	1.00	about helping the environment and helping farmers any brands that come to mind t
+62ee9935d51ecc5bcb5a581b38a20ce1	0.94	because it's kind of like the concept of a harbor and before there were trains a
+639562050b804dc2fb727df99120f349	0.81	street around the city that goes around the city lots of time your main street d
+64fe0adc572a2dd92cd64017c1af64f9	1.00	you're going to discuss which classes you have when they are how many classes yo
+659aa9ee48bd868486dede20162e715d	0.96	they will come up to each individual person especially if you look like you're n
+660dc02fd7574e335346ba662ebf53ef	0.73	for those badly needed sleep hours that you need if you don't have time to get a
+664fda91a5a40da215d6cc18703665c5	0.76	it doesn't mean that you're behind the wheel of the train it means that the trai
+6663625625af9fafe8d051012aa9b988	0.91	make sure that you charge up your ipad so that you can watch some movies get a g
+67dfeaad894e333895d7fe69cf9fda8d	0.73	that was tough but let's look at this one in dem schlafzimmer that's a prepositi
+690ad18040f2d06d24207c8ab26a44b9	0.92	i think you always have to be patient when you are painting you don't have to pl
+6976ab8da8503c165c83debd31116c53	0.68	if they find you traveling without a ticket ich habe den letzten zug verpasst i 
+6992a98a040da8d83ef7d69ef040aec2	0.86	the gleis is the track and that's what the trains drive on and then you've got o
+69eb4f988952c98721e6ff4e51b7af2e	0.85	you're learning the class you're also studying so if your teacher says to you yo
+6a108b3a4cff2be6a3fdbd18eec82175	0.93	the second does the talking meaning the sound comes from the second vowel so in 
+6b7e1824da2e41c10636236b44ab0fb9	0.89	and remember i told you it's important to go ahead and be very sensitive to thos
+6b890c8ebe3a986f0035165e24b68fb4	0.90	a new storyline now and let's talk about this one instead ehm so can you see sto
+6be682b33d6d240e88db1a848db284e8	0.83	this is lufthansa flight lh8561 from columbia to washington dulles international
+6caa7e60eac6f6369ef44f8c09609064	0.70	she's now at the kindergarten okay so i have got a little free time today cool h
+6de44b4f829d1392366de735708020e0	0.78	and wie heißen deine geschwister what are your siblings called to answer these q
+6f013981e888376bd2f330b85498d748	0.76	a double room for one person with these 65 euro if you want the frühstücksbuffet
+6f0589f3f4e02c223714320e46620966	0.75	and what is the masculine accusative it's der and you are placing the plate so y
+6f93b1615fdba2370fcc98f1aa08228d	0.80	okay so we're talking about the cat the cat is the subject of our sentence nothi
+711f6c3f648c3e06860f2c968ceadf03	0.80	for example wast hast du am freitag um acht uhr and we would answer ich habe che
+7277549d89985c1dbeaabc40d6a12da3	0.67	okay let's try some examples in dem esszimmer ich stelle den teller auf what do 
+7300415f7fdeba0bce4163a06b81fb8c	0.62	that's a good question or maybe if you don't know then that's also a fine answer
+7350170c4757cbaaab368fa42cf423d6	0.59	with shareholders because we wanted them to think act and behave like sharholder
+73764b45739ef8e813f7f4631ed9ae30	0.69	so now we've got our going and our coming our hin und zurück and so let's take a
+73effaf903dfa01f3ed9f1cd9a4acba8	0.88	koblenz all the way to munich so let's leave in the morning let's leave early we
+753080da0dfe60907198abbc2119c59d	1.00	looks pretty good let's take that one so we chose that and
+755d1fc7b075d84eef798cbf1b92ba45	0.82	let's choose the sparpreis if you have a bahncard then you could take a look at 
+75ff2534af16a905720236457de5709f	0.75	from draught is that something you are aware of that's ever in the news do you t
+7681a64a4eb868e40a213d3ff440fde7	0.69	let's start with dein or deine dein or deine are mostly found in questions for e
+76b1060d05e89e1909e14317d1a9003c	0.75	zwei jahre war ich in unverständlich zwei jahre geräusch unverständlich sit over
+77fce9bf7ff28723d298b9afbc776f14	0.94	the environment and so on there are also special tv informations where you hear 
+782383c02f74a85cc41d0d026352b5fb	0.83	yeah becomes very common then we minimalize step by step the use of pesticides s
+79a9f7b463219592c858be79c4722afd	0.80	let's travel august 10 that's gonna be hin oh i clicked the wrong one so this is
+7a3cfc31e4acc3535ac4391c796a6f74	0.88	then you would tell them that you have a code and they would ask you to enter it
+7a42765e33b182276653040162db06d2	0.81	for my child if it is tasty for her and also for my husband if he likes it or no
+7a4c57e3a7292d0f98b7e8d3e647660e	0.86	a safe for your money and your belongings if you want to change the klima in you
+7a6be0d13891570fcdcb42171edbb9e1	0.58	er war in der lage diese 480 millionen zu behalten was war seine stellungnahme z
+7b2f3eadf38205cb9d48eca238284065	0.75	so i think everyone can be a painter it depends on how you see it
+7bc8e89a87a973017e4df9e423969308	0.92	eggs for sale and a lot of different herbal teas bratwurst these little snack st
+7bdaa7c2203be199da0adaee63bb0ae2	0.95	and this gives you information about your goal bahnhof in other words the münche
+7ec6798cdfc9ee8c27ee6d1322e7adf0	0.85	so yo're abflughafen is the airport that you're gonna fly away from abflug is yo
+7f59d365e46a505a1415e51d59136d29	0.88	and you care about your abfahrt you wanna leave on friday from koblenz at 8 o'cl
+7fedc303828fa87a14297b38d6652508	0.78	bauernzimmer kind of like a barn room or farm room the price is cheaper and if y
+8046b2bd94e2afc70ed51e6383d8917f	0.89	germanic tribes and german kingdoms have been around for many many hundreds of y
+809fd1dc1c268d1a2dc6faa6ae04bb68	0.88	notice our travel time is 9 hours 10 minutes in the air at o'hare we would chang
+81bf1f88ba00bb550668e5b42e3ececf	0.92	most of the time people fly into frankfurt generally the best prices are into fr
+827242100d9c7167b9723f7334559415	1.00	and saturday and sunday and holidays it's 735 in the morning until 1030 on the w
+82addbd5d94ff6f26955f6702ccaef2a	0.86	on the wall is a prepositional phrase you're not moving the poster you're not in
+83102ab226416570155b0dd3844cd25f	0.56	this is the dom which is a cathedral dom a cathedral so this is a catholic churc
+841eff16561bca830ed4bde4139db968	0.89	and this is good to know this train travels daily except for august 28 it doesn'
+84e7327687c0388b52ed7a4e9c04b1e6	0.73	products what's really important for you to look for i look after the naturality
+85050a09ba9f5b8cfcfee86477fcf14b	1.00	in the old days germans used to call automobiles wagen so they had the wagen tha
+852b2ab57696b9b26c6f4474a389232c	1.00	and we wanna choose an einzelzimmer and maybe let's go on this weekend here so w
+8642510b89c3f289c02422fc9741303d	0.77	this is a letter in the german alphabet it is known as sz it is the equivalent s
+876a83dbb8ecaddf0084d77755725c98	0.64	i would say the quality is higher i would ehm i don't think that the taste would
+87f4a2d4928284a68e6217c5e10df7ad	0.94	and the church is very very large compared to the rest of the buildings so these
+886879390aad0902c4ba838c4734a703	0.78	so wie heißt ihr the two of them are going to both answer wir heißen anna so we 
+89bbd6a39cd27e847124bd67d061a3ed	0.82	the main religion is catholicism many popes had been from germany the second big
+8af1a73ad47bc6015094768a3bcd1177	0.62	and the girl answers sie heißt anna so what do you think sie means if you said s
+8b80a41795450a9df7a8c9518825ea24	0.81	and so that's why there's not a lot of trash in germany because they recycle a l
+8c8def86ae0dc6111618b732955bb686	0.93	notice the verb heißen now is heißen all right what if we're talking about two o
+8dba5fcfe907bbb17dbf1267b689a943	0.89	do you think that's the same as the stories that i show to you just now
+8f01e90eeda0be3fdf0f90afe801a684	0.83	all right the rathaus is the town hall and the town hall is normally located dir
+9084a2d5d1215a58f2fcdcf80d1c4521	0.94	creating iii which is like little dips to protect the soil from the wind and the
+91382615a9ae294d23d81737db6eb460	0.69	and probably for a long time the lamp isn't moving so because we have auf and th
+91c3adae44bd0fcf664e3cc69dc504e8	1.00	and germans don't use air conditioning quite as freely as americans use it so yo
+928462c46177db472bb664a65fdd40c4	0.95	to change planes and to get on the real lufthansa plane to fly from washington t
+933a8cec93a623666b555a908a7dce58	0.94	then those prepositions will take the dative case and that means that the articl
+939419e70f22cc5f77f61b334ae0b168	0.80	or to rollerblade or to skateboard that would be the verb you have to use for sk
+93c397142557b0fa39705682d15ee251	0.75	i am sample translated text this content will be translated in production i am s
+94322181e508edf61bad231f31fd363c	0.79	call it a wagen and then when the train comes along don't call it something new 
+94a5e4e5cd3db2464c2642fde8d9f65c	0.60	german so i went to a website wwwlufthansacom actually i typed in wwwlufthansade
+94dd2c7505693da57cd0358a458a8890	0.50	er ist traurig if i would want to describe my best friend this is what i would s
+971bd4f0b69345b214b789549409deea	1.00	the environment and for the farmers and yeah ok and are there any other brands t
+97395bdae16270752a2c2978e240bebd	0.87	and because i think it is good to raise a child in this responsibility that ther
+97a9fb4f158decc1dee565eb6314e769	0.60	which classes do you have you could answer ich habe mathe englisch deutsch gesch
+97d3f007e19c6a1fe7caeab41568b9d1	1.00	these are the rules for your gepäck for your luggage so you can take two bags ma
+97ecb1a4b7002ff0c49dfbc4f906d223	0.77	let's talk about possessive pronouns possessive pronouns show ownership the ones
+993b9a61ea6c56d42fbea1f2c13aa73f	0.89	hey today i wanna talk to you all about gute starke sätze and we should know fro
+99b91c17cf76456e06ac2854bb51e99c	0.88	yeah and i think that's something that's not just for now that's for the future 
+9ae4776387a91191510f8e4c0cc2e7ad	0.78	if you've been studying your vocabulary lists you know that poster is der and th
+9b44355c42c7274a85426c8c14343278	0.64	i think that it's a bad idea to ever chance riding a foreign train without a tic
+9bf77c88f29d61776316a815ee6be7e8	0.75	i knew from my friend he had a problem with tomatoes and water so it is so commo
+9db2cdcbd93570ad76f0d73eff015c41	0.72	cuz we don't care about the decorations we just need a good clean place to stay 
+9e1a148e5a70f386ad24310f08dc3b68	0.86	so for example you can get a schlafwagen from munich to paris and a lot of times
+9e56a033f440f959a5d2c9f7a12d630f	0.88	you have to bag your own groceries and you have to put a quarter in to use a sho
+9e840d77d4083767c9102ae7291be3f2	0.72	think of asking me to move to germany to palo alto or even require me to work ou
+9f747544631ccb075f0fe55e72a9d991	1.00	and it's normally marked with the db the deutsche bahn or hbf which means hauptb
+a03aac8d4fb6a18abbffd9fd638a8152	0.82	so first of all any questions about the story hm ok no so what would you think i
+a0e59f6acd460535e6392e92992c673d	0.92	and as you said knorr makes them with less pesticides and not without that's cor
+a18416f4b887b26aacc678823284f0cf	0.86	medical insurance and of course they will take your medical insurance for the un
+a215fee50afe5ba12c408bd28ff5037d	0.75	here is a deal we could leave frankfurt at 1045 and return back to columbia at 8
+a2fc4a520af1a044f45baa5eeab75171	0.75	oh and warmers for your hand towels you get a nail file and also cleaner things 
+a4f75041dbd04f5d194cc2bf540c88d3	0.73	they have a restaurant at the hotel and if you want to check it out you can look
+a5117be152ef88e5ddc821ac08ed3d16	1.00	why are you traveling are you traveling geschäftsreise for business or urlaub ho
+a56199aaaa97c2e63779f67dceac5d41	1.00	so columbia sc the initials for the airport are cae let's choose that one and th
+a5e9a78532c8b809c3bf457e61b662ba	0.68	how the plane is set up a lot of times people won't get a seat in the back of th
+a64a9d4234df2241968ccd10298b16aa	0.92	to know the specifics ehm ok to stick in with the story how would it make you fe
+a665d97e9ebfed67182efa9dabe16a99	0.69	fine and you good do you speak english yeah oh great ok i was wondering if we we
+a67bebc7a61064cb17a8e4722b51b5f2	0.67	und seine kinder heißen sophie claire und emily the neat thing about possessive 
+a68f3c12b60ddc6afaf17f36632fae6b	0.81	okay so this is just a little bit more discussion and just a little bit more pra
+a74e84ea36f2fd0fe8e08de1ff24d481	0.90	and they're both using the same track and it gets a little confusing so it's rea
+a74f49c24b80953e8ed72619aaa064b4	0.86	all the way to wiesbaden and then through the frankfurt bahnhof and then to nürn
+a7de81798bb8bc7180efd497b33fb143	0.67	so it's always best to travel second class especially if you're a tourist and ge
+a82ca6c837f3bd1e99fbfe074e83c41d	0.94	are made because it is just saying they are growing our ingredients get training
+aa854f82a1aac046bcec589191a627ab	0.91	and they're busy from about 11 pm to 4 am now keep in mind people take public tr
+aa8d58579b63da67ebb104589e682d61	0.79	unless you want to pay if you needed to rent a car but why rent a car when you c
+adb2ebcb3b86b8986b412487791096aa	0.92	whether or not you have umsteigen are you gonna have get off one train and go fi
+ae30488e697dd05f6baa73daa89d4099	0.94	in the food and in the vegetables and in the fruits and there should be more way
+ae3ced5db09459f18b278fee3f0eab45	0.92	german okay so let's book this flight we'll just click on this this is going to 
+ae9e407a22c5381f763c0ccd9800896d	0.75	we get rid of the do and we focus on to live wo wohnen deine großeltern who is y
+aea6d2c96ebfb5bf296c94818d058215	0.84	this gives you some choices as far as upgrades for your luggage or to use your m
+aeb2084958f3fc70cf2f89056ea9588b	0.53	which are these words i he you all of those words they're pronouns and she's goi
+aee4734ac8f0b6ba78bb1e6c1badc339	0.83	or last chemistry and you could also say at this point ich habe eine doppelstund
+af0cd795233297d1f786a4798ea02be6	0.67	at rush hours quite a bit because most or a lot of people take the train to work
+af7fb7a2c675c7ed626cca3af9361efc	1.00	or maybe let's choose this date as the date that we arrive and then we'll choose
+b02757932cc6255d87d6640c6d1b2870	0.71	hotel fewo und djh all right so a hotel is just like a normal hotel it will say 
+b0b0c3b05529dbcc4b3c2e7c89e8d450	0.92	is there anything here that you don't understand or that you have more questions
+b10a42aef1ebb06d1fdf9f0029d544cb	0.50	i have art after that ich habe danach englisch i have english after that ich hab
+b165b627de777a1df8d85a9223571e0e	0.84	and it came up with three hotels right at the top all of them were listed as thr
+b2e2360830c4baffe329d94aba4c81f0	0.69	on the sofa is a prepositional phrase and the cat has been sitting there all mor
+b31e45f3f280a3122c9f83d0db68ae1a	1.00	yeah after this kind of production ok yeah so it wouldn't taste any different bu
+b36be883fc156dc4ddcccb98a1e66335	0.63	you have just finished exploring the topic of time which is very important in th
+b379aa711fcec95475fc9324374638e4	0.54	in english we would just say i like to snowboard but in german snowboard is a no
+b403848c7f251a2c5c5604254d3847f1	0.83	and this are just two different names this is a raiffeisenbank and this is a spa
+b416430ee2f36747bda7d12ee03e380e	0.94	and this is your rückflug i'm not sure how that date got in there so let's trave
+b467d5cb225c50156b1a9d9446a109fd	0.88	4 track 4 is where you're gonna get on the train einsteigen gleis 4 your train n
+b4d0ab4390fbd2e56f56c5858a8e8993	0.62	you could answer the same question if you only have it one day a week ich habe a
+b4dd19cfbd90756bd9792a4f0b2c2df1	0.82	it's just there it's a preposition of location it takes the dative case so what 
+b556a369448afdffe354fd7a93d5c827	1.00	the farmers that are growing our ingredients get training in more sustainable te
+b56ef4a63dcf9eaf5882f8462b6aa00e	0.76	okay most of this powerpoint is made in english wo in der stadt culture there's 
+b6bec94a2dc9efd21686818fd21354c2	0.92	and so they're given numbers to help you distinguish where you need to be and so
+b758c79f90b080e2b70a4316c5cba0f2	0.79	dem tisch so the lamp stands on the table now normally tisch is der tisch but he
+b75c721f73b24d8229ae43b25cff383f	0.83	anybody can say memorized phrases what we want from you all is to really build w
+b7bf65fd194e7f181252db3ed9bdf3a5	0.88	or this plural would carry that extra e let's continue with ihr or ihre this is 
+b8909d2b7e69dc55d14ab870d991dfa5	0.71	and there's not too much vocabulary that you need to know there's a few words th
+b9bcfbac20cfb2e43b44bf551ae5b2d0	0.94	the way that you would expect perhaps in the united states so expect to be a lit
+ba5bc0d9f839fcdbbdb800e19bb55176	0.83	conjunctions combine sentences you may have heard the school house rock song con
+ba7dc192ce7efc66e00c25fa9b855615	0.85	for the frühstücks buffet and then i guess this is what we were looking at earli
+ba8cba90c33bddb07e8b73586c8257e5	0.65	ist sportlich hey my mom is skinny because she is athletic so as we go through o
+ba8e518c28ba057fb01757295d25b541	0.93	and so it's driving away from track two once you get the hang of it it's not har
+bab29bdecf0b9c290a0821c9a66f9861	0.78	another storyline now if that's okay sure okay so this is story 4 so the story i
+baf29f98e2e39483ab37f1c4e7d8e4e9	0.58	wie heißt du or how are you called what is your name the second girl is going to
+bb038066f6d9409f7d885c7812b0b9d8	1.00	that anything you share in our conversation obviously we won't share any of your
+bb081ba29c451669cbf3ba1cc098d88b	0.76	and this here you can see is the allianz arena which is the stadium in munich an
+bb47c16ebab33206209dc97a5c17981d	0.69	i also think it's a good way to minimalize the high rates this high rate of pest
+bb49c467fa9f5daf33d559c06999ea0d	0.92	so let's check this out and see if this is a hotel where we might be able to sta
+bbcd0964b2a21403df0a739ba2c8f7fc	0.87	you are going to use am if you are talking about a time of the day you are going
+bce2765f5fadbd2dd72ff4fc31e47fa3	0.67	no movement just location what is wohnzimmer das wohnzimmer what is it in a prep
+bdcac379c1692f0d8d9535c4d278791b	0.77	storylines that i shared would make you think that the product was more natural 
+bdddae80af9acc1bdadb8e3c9e6dea91	0.87	a collection of different types of food products yeah first of all do you buy pr
+be1218c8d0e843bfb4e46e3b5f5443ba	0.69	this indicates genetive case because it's talking about possession but don't wor
+bef98f8f636e2b24f5a271c7bb4aba2d	0.82	drinks and you'll buy this in the case in the kiste is what it's called this is 
+c0127104df0272a02c0a52617bf8724b	0.88	then you have to run down the stairs and across and back up the other side it ca
+c020c07810f6421a9070f525c2e87e23	0.80	for example if somebody asked you wann hast du englisch you could say ich habe i
+c0306d080448b3268c5757152fd7a13d	0.91	so we want the best flexible rate they have to offer and we see that july 27th i
+c088f112ee697c43d7dbf1e0d99bb876	0.65	was machst du in deiner freizeit let's talk about hobbies and free time activiti
+c0c74ec8342097b88570e76304a49af3	0.81	and you have your market square in the middle so here you can see there's a chur
+c1d85618da2cca4db38a9f0198b004ca	1.00	1338 in the afternoon if we look up here we see the bahnhof where you're leaving
+c25b22eb959fb5a14ebe2cbbd2e73eea	1.00	that's pretty traditional and they've copied the american concept of the buffet 
+c26559e228914eb9888d64155e7fc327	0.83	have a bahncard and here's some options if you want to create an account so that
+c3439b1c3bf12dda119e7579cc94d754	0.82	really helpful natalie i really appreciate your time today did you have any fina
+c44189bc6e22062cb0da2d2618840325	0.57	let's read a little bit more about the standard room it starts at 57 euro it com
+c48b63464760cfaa8db713d787cb1cfd	0.62	what is it gonna be in a preposition that talks about location das changes to de
+c53dfeb50851ba0517896663bf1cde7b	0.94	kissen in other words their comforters and their pillows are made with goose fea
+c550384d5e872723f23efc659ecdc328	0.91	i look for fruits and vegetables that are fresh you can get them on the market y
+c5a093a6cc2bedaa3c3e382a092155e5	0.56	is to use the verb lernen lernen means to learn to study up until this point we'
+c5b1dc2cb27ec2cbf7cda7d7401a56f5	0.82	they recognize my computer which is scary because they know that my last search 
+c754709e4917f4310de66998fae7aa4b	0.86	my child give to my child because i think my daughter shouldn't eat so many pest
+c78dbcd4e3a53e6487c4bb8278fe5ac7	0.88	where you can look at the way that the plane is set up the plane has basically t
+ca031d0679fc08c4579f751d441d75ad	0.90	if you want to reserve the flight the seats the sitzplätze that we were talking 
+ca0f155dd030458ac470b7505893cfa5	0.88	your bäckerei is also gonna be marked with a pretzel sign as well that comes fro
+caf10fe504359a92f89b13cb78c70280	0.95	then you could choose the age group of your children but you're not traveling wi
+cc3ceec8f316928480527752c22abbb5	0.50	in which it's realtive to the other classes so here is an example how we could d
+ccde03f1c0cd477c1b156524bc04db1b	0.92	getränkemarkt so if you wanna buy a case of mineralwasser for example right here
+cd721b7c79769110ab2151b5ac342345	0.86	der obst und gemüseladen here you can see this is in the middle of winter but yo
+ce01521bfa1a3b58e6522d38e7f120e2	0.56	die imbissstube die imbissstube is just a snack stand you can go and you can eat
+ce3ba855eeacc7cde4e965453bc135a3	0.94	the olympics were held in munich and now they use that for soccer games as well 
+d17070487ac0022fbf89931886cf1a24	0.87	or a suite go for the water because you have to buy your water in germany and it
+d1f178c58dd06887f7ff1bf0f8459873	0.89	cops it's crime fight time the case of the sinister spa cop's file 89724 the gra
+d26c631ba2019de280df1293e767eb4e	0.82	υou don't need a hotel room you're not a worker or someone who travels for a bus
+d34245392ff5b4b6e7d7841f2f94bea0	0.79	hotel heidelberg is a private hotel so it's not part of a chain and this gives u
+d34aeae2fffed30a529b4628d4d72708	0.88	that you need that a lot of times people will go into the reisebüro the travel o
+d3d2bc1b5ecc030beb23cf1dca3c9354	0.90	and children from 7 to 12 years old only cost 4 euros the bed linens are made ou
+d483f1e9b46148f34130c4a645c6080f	0.80	and then it looks like that there is a bus involved and then that ice it's cheap
+d49233a7553aa2d38d40c8ce7acbabcb	0.91	don't go for it you pay a lot of money and you get an extra bag of peanuts or so
+d4ce43951fad6288575fa6ecbb25adf3	0.67	sitzen liegen stellen hängen and ist okay so let's see how all of this works tog
+d57646e6a7e3d7498fd3e49a664a4758	0.67	beschreibungen wie siehst du aus what do you look like when describing yourself 
+d57b99b66868b00ee9f2174b94d0b0e5	0.94	i really recommend some form of travel insurance whether it's through lufthansa 
+d62a186b4595136eddca3040376d8b1d	0.81	and hin und zurück as you already know means there and back wann kommt der zug a
+d7d3b03d8fae0b7af73543150b225e7a	0.58	an apartment or a condo and then we'll talk about the djh in just a second here 
+d7d7dee0a75f6601b5e5bb4e7667f216	0.89	first what comes then and what comes after that and what is finally your lastly 
+d86ff1eb8e0d9ed02021fe66a6f4b6b5	0.76	and here you can see what i mean by how ornate it is inside so we have a lot of 
+d8bf69ad7321c5ec9432e0eeac3948db	0.67	okay so let's look at the phrases that go with der bahnhof we had just looked at
+d97196a5a59b3941b52f7716687c3e88	0.54	machen that would mean to do or to make ich mache gern ich mache gern sport i li
+d9e29d3b771b88fe29ed6002d04d928f	0.71	yeah so i have to look if something is on a special price for a week or so okay 
+d9f9a1ed48979d7c26f21663d2d84ff7	0.92	in the train system they have first class and second class kind of similar to th
+da798294997ddbfa4cb1a795fd6332fb	0.50	so ich being i ich heiße anna wie heißt du du being you wie heißt du so anytime 
+daa3462804a4d1042786aa910c0ed2d7	0.69	or in germany the students might say ich habe dreizehn fächer i have thirteen cl
+db1dd895219d3288e1c33b8a5f39e02e	0.90	in order to do so you're going to use the verb heißen heißen means to be called 
+de1205f3054f0dbfe6889fa8c27bf6c7	1.00	knowledge of this so so this problem that the farmers have should be more common
+de26b81ba250fd1071e42e5a33448875	0.57	spiele schlagzeug the drums oder trompete nach der schule i play the drums or th
+e00707e390bca40a744a4c8043ad0750	0.84	ways to talk about our schedule we can talk about time in terms of our class per
+e07d118b2afbcd5aaaeef9f019ba2081	1.00	and farming uses 70 of the world's fresh water we support farmers to save water 
+e0f1da8c9ede8b93ae194f44cb675825	1.00	as many pesticides or fertilizers to the plants so we use sustaibly growing ingr
+e26792a68c0446064bdbbd366fff6988	0.80	elaborately decorated with gold leaf and a lot of paintings on the inside so the
+e29897bc8d6df26b3272b56383586afa	0.50	to be at the local butcher or the local baker wo ist das geschäft oder das kaufh
+e425335a7a226e9fa03f7fba6ac85a0a	0.85	so that they can go where they need to go and a lot of times the deutsche bahn w
+e49316833694de8a216e3ecc651c6775	0.71	that affects travel around germany and it also affects travel becasuse the airsp
+e541770041014ac929a99c90c885b1ea	0.59	sie lernen and big sie lernen so i could say ich lerne mathe for example and som
+e5c71b14841141955a5f724bcba3afd7	0.78	and your answer could be ich habe geschichte so what do you have fifth period i 
+e7052924fbfa63a8d3ee939d239a0077	0.68	oh sie geht früh schlafen sie geht früh schlafen can we unverständlich yeah unve
+e766a0277f54bc148c06628f8de6b647	0.54	if you ask people for directions in germany lots of times they'll give you direc
+e782bd6484f3b3045d8c015730bd64fe	0.50	die of illnesses because they drunk water that wasn't so clear so nestlé is a br
+e7b66fa228984ce6367132faf398977c	0.93	a test for our brand to check that they meet our social and environmental standa
+e8675e69adcf2da3c52b0f90079ef555	0.75	to germany so you have a lot of fresh and somewhat local produce for sale die bä
+e90057f3053125641b96475c85b8b244	1.00	all right let's see what happens when we're talking about more than one person i
+ea31eafd18bb77cfefb11896d34523be	0.90	so your train will not be stopping which is nice this is how fast your train wil
+ea9890c3435cf36fc7a68374066721c3	0.71	für internet of things und der schreibt in seinem persönlichen blog einen wunder
+eabb2ef145d470d88f54d5be6c8eb766	0.83	the idea is to get there as fast as possible this is the fastest train that you 
+ec796cae40e55486b012e7e4a1947ca3	0.69	okay so remember we said that it's important to learn the der die das that goes 
+ecaa7ceae627dfe49150e428a2f0a223	0.89	and the first part that you'll have to fill in is von bahnhof from which train s
+ecf1403fd663896b7a3c057650a4abce	0.96	your travel time will be just under five hours cuz you're basically going all th
+ee07e30469ef5bad46026b781edffdc0	0.80	cops central organization of police specialists fighting crime in a future time 
+f091eee7e6206ee8e766bb37b95d3151	0.77	probably most of the traveling that you'll do while you're living or visiting in
+f17a9b9f5140b4fb5ef2321123880cd0	0.90	because the train would be pulling away at 0848 and when they say that the train
+f19323fe3aa0f10f9449732df467074f	0.81	and when you think about this churches were built a long long time ago it's pret
+f1a5cc9e7f82a5d034fd3931cd4f76b6	0.66	in the house and rooms of the house for example it's important not just to know 
+f29138529b8ab666326b26229a844182	0.60	zum beispiel for example ich habe lange haare und braune augen you can even say 
+f2d35dc5818db3fab6c4d819ef42ad42	0.79	you gotta choice between a simple ticket which is one way or hin und zurück whic
+f303dd12d06182461302c128e766ac56	0.86	and a lot of people will come from the outskirts or the suburbs the stadtrand or
+f3086792ffa6af616566d6fcbe7cc0f9	0.91	your rental car or just the hotel from them also and they have deals for that th
+f3534e061bc9a52f61f7bef0662dd592	0.79	any other brands food brands you could think of that you think yes i know they a
+f4b951dff061df6f0ba712f6a482fb1e	1.00	and double rooms have already been booked out but if you want that souterrain zi
+f4fccd30f1e786d52bc6e6a52d5b1def	0.53	ich habe braune augen if i will describe myself this is what i would say ich hab
+f5102661fdfb9e87fc3767f14e57fa97	0.86	on your screen and then let's just talk about these and get your feelings on the
+f54a8b4592701303ba065f50bb000f11	0.92	not only to get new products but to be responsible with the environment with the
+f6508c7d7ed2c2d33b3bca52b1d5fb4e	0.62	hast du eine schwester is also a question even though it doesn't have a question
+f70aec4e8ad468f9130eae89312f79b4	0.77	it's just saying that we use less pesticides it's not saying there are no pestic
+f7f103e474d62375086acca5709fad78	0.89	are the most important topics or issues in to do with environmental impact or im
+f7f68087ea780f31fa35db0029a6620b	0.85	so i enjoy eating at the restaurant usually at my hotel also here are good thing
+f85eb6cf1aee909865f089656e71a54d	0.62	was ich vergessen habe i think we are good with the german part
+f91624a9f578f43f33d63fb69cf62081	0.80	germany is slowly getting on the nonsmoking train no pun intended but a lot slow
+f9ba6a303ff3d8f88244d977b190192c	0.89	if you wanna buy tickets for yourself and other people you just hit the plus but
+fab0e9d3e014ad0ec8732a9d031b8da3	0.84	we want rooms on the same floor we want to all be able to be on the same floor t
+fc1d2f899ac50e0a155dcc352db01af8	0.89	do it or if they do it perhaps they don't talk about it too much except let's ju
+fd2feff7bdef4dac8cbf4487790bf26e	0.67	so what does der change to in the dative case dem sonnenschein okay take a look 
+fdcf304fa3a8033f9e36fb4726dd22de	0.77	i think that knorr looks more in the future because they want to make a progress
+fdf524adb7dc3cada2b77769015023e4	0.65	normally when i want to paint i started by the idea i have in mind so i start wi
+ff0b761ad2e58b1d02fdf0b9b91cbbf1	0.92	and get there at 211 in the afternoon this also has no umsteigen it's not quite 
+ff9193e85752fc03012e460cea60b2d5	0.94	so the plate is in the process of moving it hasn't been there forever it's in th
