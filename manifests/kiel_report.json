@@ -30,7 +30,7 @@
    "manifest": "/Users/christopherwitzl/Documents/Entwicklung/omni-asr-test/manifests/kiel_spon.jsonl",
    "clips": 3609,
    "hours": 9.998,
-   "words": 84177,
+   "words": 83297,
    "speakers": 64,
    "realized_phones": 2458,
    "subcorpora": {
